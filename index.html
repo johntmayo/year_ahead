@@ -24,6 +24,11 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex;
+            flex-direction: column;
+        }
+
+        .header-top {
+            display: flex;
             justify-content: space-between;
             align-items: flex-start;
             flex-wrap: wrap;
@@ -86,7 +91,6 @@
             display: flex;
             gap: 10px;
             align-items: center;
-            margin-left: auto;
         }
 
         .data-btn {
@@ -116,17 +120,56 @@
             display: none;
         }
 
-        .view-btn {
-            background: #4CAF50;
+        .view-toggle {
+            display: flex;
+            background: #e0e0e0;
+            border-radius: 8px;
+            padding: 4px;
+            position: relative;
+            gap: 0;
+        }
+
+        .view-toggle-option {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: transparent;
+            color: #666;
+            position: relative;
+            z-index: 1;
+            white-space: nowrap;
+        }
+
+        .view-toggle-option.active {
             color: white;
         }
 
-        .view-btn:hover {
-            background: #45a049;
+        .view-toggle-slider {
+            position: absolute;
+            top: 4px;
+            height: calc(100% - 8px);
+            background: #4CAF50;
+            border-radius: 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
         }
 
-        .view-btn.active {
-            background: #2e7d32;
+        .view-toggle-option:hover:not(.active) {
+            color: #333;
+        }
+
+        .secondary-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            justify-content: flex-end;
         }
 
 
@@ -609,19 +652,172 @@
                 font-size: 9px;
             }
         }
+
+        .timeline-view {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .timeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: max-content;
+        }
+
+        .timeline-view.lines-2 .timeline-container,
+        .timeline-view.lines-4 .timeline-container {
+            width: fit-content;
+            max-width: 100%;
+            align-items: flex-start;
+        }
+
+        .timeline-row {
+            display: flex;
+            gap: 2px;
+            min-height: 120px;
+            position: relative;
+            width: fit-content;
+        }
+
+        .timeline-day {
+            min-width: 12px;
+            width: 12px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .timeline-day:hover {
+            background: #f9f9f9;
+        }
+
+        .timeline-day.empty {
+            background: #fafafa;
+        }
+
+        .timeline-day.drag-over {
+            background: #e3f2fd;
+        }
+
+        .timeline-day.drag-creating {
+            background: #e8f5e9;
+            border-color: #4CAF50;
+        }
+
+        .timeline-day.drag-creating .drag-preview-event {
+            display: block;
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px dashed #4CAF50;
+            font-size: 8px;
+            padding: 1px 2px;
+            margin-bottom: 1px;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+
+        .timeline-day-label {
+            position: absolute;
+            top: -20px;
+            left: 0;
+            font-size: 10px;
+            color: #666;
+            white-space: nowrap;
+            transform: rotate(-45deg);
+            transform-origin: left top;
+            padding-left: 2px;
+        }
+
+        .timeline-day-events {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            padding: 1px;
+            min-height: 100px;
+        }
+
+        .timeline-event {
+            font-size: 8px;
+            padding: 1px 2px;
+            border-radius: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: move;
+            color: #333;
+            flex-shrink: 0;
+            user-select: none;
+            min-height: 12px;
+        }
+
+        .timeline-event.dragging {
+            opacity: 0.5;
+        }
+
+        .timeline-month-marker {
+            position: absolute;
+            top: -15px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .timeline-row-header {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 5px;
+            min-height: 20px;
+            position: relative;
+            width: fit-content;
+        }
+
+        .timeline-day-header {
+            min-width: 12px;
+            width: 12px;
+            font-size: 9px;
+            color: #999;
+            text-align: center;
+            padding-top: 2px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <div>
-            <h1>Year Ahead <span id="currentYearDisplay"></span></h1>
-            <div class="tagline">A simple visual planner for your year ahead</div>
-            <span class="save-indicator" id="saveIndicator">
-                <span class="icon">✓</span>
-                <span>Saved</span>
-            </span>
+        <div class="header-top">
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <div>
+                    <h1>Year Ahead <span id="currentYearDisplay"></span></h1>
+                    <div class="tagline">A simple visual planner for your year ahead</div>
+                    <span class="save-indicator" id="saveIndicator">
+                        <span class="icon">✓</span>
+                        <span>Saved</span>
+                    </span>
+                </div>
+                <div class="data-controls">
+                    <button class="data-btn export-btn" onclick="exportData()">Export Data</button>
+                    <button class="data-btn import-btn" onclick="document.getElementById('importFile').click()">Import Data</button>
+                    <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+                </div>
+            </div>
+            <div class="controls">
+                <div class="view-toggle" id="viewToggle">
+                    <div class="view-toggle-slider" id="viewToggleSlider"></div>
+                    <button class="view-toggle-option active" data-view="year" onclick="setView('year', this)">Calendar Year</button>
+                    <button class="view-toggle-option" data-view="timeline" onclick="setView('timeline', this)">Timeline Year</button>
+                    <button class="view-toggle-option" data-view="month" onclick="setView('month', this)">Single Month</button>
+                </div>
+            </div>
         </div>
-        <div class="controls">
+        <div class="secondary-controls">
             <select id="yearSelect" style="padding: 10px; border-radius: 6px; border: 1px solid #ddd;" onchange="changeYear()">
                 <option value="2026">2026</option>
                 <option value="2027">2027</option>
@@ -629,9 +825,7 @@
                 <option value="2029">2029</option>
                 <option value="2030">2030</option>
             </select>
-            <button class="view-btn active" onclick="setView('year')">Year View</button>
-            <button class="view-btn" onclick="setView('month')">Month View</button>
-            <select id="monthSelect" style="padding: 10px; border-radius: 6px; border: 1px solid #ddd;" onchange="changeMonth()">
+            <select id="monthSelect" style="padding: 10px; border-radius: 6px; border: 1px solid #ddd; display: none;" onchange="changeMonth()">
                 <option value="0">January</option>
                 <option value="1">February</option>
                 <option value="2">March</option>
@@ -645,11 +839,11 @@
                 <option value="10">November</option>
                 <option value="11">December</option>
             </select>
-            <div class="data-controls">
-                <button class="data-btn export-btn" onclick="exportData()">Export Data</button>
-                <button class="data-btn import-btn" onclick="document.getElementById('importFile').click()">Import Data</button>
-                <input type="file" id="importFile" accept=".json" onchange="importData(event)">
-            </div>
+            <select id="timelineLinesSelect" style="padding: 10px; border-radius: 6px; border: 1px solid #ddd; display: none;" onchange="changeTimelineLines()">
+                <option value="1">1 Line (Full Year)</option>
+                <option value="2">2 Lines (Half Year)</option>
+                <option value="4">4 Lines (Quarter)</option>
+            </select>
         </div>
     </div>
 
@@ -691,6 +885,7 @@
 
     <div id="yearView" class="year-view"></div>
     <div id="monthView" class="month-view" style="display: none;"></div>
+    <div id="timelineView" class="timeline-view" style="display: none;"></div>
 
     <div id="modal" class="modal" onclick="handleModalClick(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
@@ -710,6 +905,7 @@
         let currentYear = 2026;
         let events = []; // Changed to array for multi-day events
         let categories = {};
+        let timelineLines = 1; // Number of lines for timeline view (1, 2, or 4)
         
         // Drag state
         let dragState = {
@@ -734,26 +930,59 @@
                            'July', 'August', 'September', 'October', 'November', 'December'];
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-        function setView(view) {
+        function setView(view, buttonElement) {
             currentView = view;
-            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            
+            // Update toggle slider position
+            const toggle = document.getElementById('viewToggle');
+            const slider = document.getElementById('viewToggleSlider');
+            const options = toggle.querySelectorAll('.view-toggle-option');
+            
+            // Remove active class from all options
+            options.forEach(opt => opt.classList.remove('active'));
+            
+            // Find the clicked option and add active class
+            const activeOption = buttonElement || toggle.querySelector(`[data-view="${view}"]`);
+            activeOption.classList.add('active');
+            
+            // Calculate slider position
+            const optionWidth = activeOption.offsetWidth;
+            const optionLeft = activeOption.offsetLeft;
+            slider.style.width = optionWidth + 'px';
+            slider.style.left = optionLeft + 'px';
+            slider.style.transform = 'translateX(0)';
             
             if (view === 'year') {
                 document.getElementById('yearView').style.display = 'grid';
                 document.getElementById('monthView').style.display = 'none';
+                document.getElementById('timelineView').style.display = 'none';
                 document.getElementById('monthSelect').style.display = 'none';
-            } else {
+                document.getElementById('timelineLinesSelect').style.display = 'none';
+            } else if (view === 'month') {
                 document.getElementById('yearView').style.display = 'none';
                 document.getElementById('monthView').style.display = 'flex';
+                document.getElementById('timelineView').style.display = 'none';
                 document.getElementById('monthSelect').style.display = 'block';
+                document.getElementById('timelineLinesSelect').style.display = 'none';
                 renderMonth(currentMonth);
+            } else if (view === 'timeline') {
+                document.getElementById('yearView').style.display = 'none';
+                document.getElementById('monthView').style.display = 'none';
+                document.getElementById('timelineView').style.display = 'block';
+                document.getElementById('monthSelect').style.display = 'none';
+                document.getElementById('timelineLinesSelect').style.display = 'block';
+                renderTimeline();
             }
         }
 
         function changeMonth() {
             currentMonth = parseInt(document.getElementById('monthSelect').value);
             renderMonth(currentMonth);
+        }
+
+        function changeTimelineLines() {
+            timelineLines = parseInt(document.getElementById('timelineLinesSelect').value);
+            renderTimeline();
         }
 
         function changeYear() {
@@ -839,6 +1068,132 @@
             renderCalendar(month, currentYear, monthView);
         }
 
+        function renderTimeline() {
+            const timelineView = document.getElementById('timelineView');
+            timelineView.innerHTML = '';
+            
+            // Add class based on number of lines to adjust container width
+            timelineView.classList.remove('lines-1', 'lines-2', 'lines-4');
+            timelineView.classList.add(`lines-${timelineLines}`);
+            
+            // Calculate all days in the year
+            const daysInYear = [];
+            const startDate = new Date(currentYear, 0, 1);
+            const endDate = new Date(currentYear, 11, 31);
+            const currentDate = new Date(startDate);
+            
+            while (currentDate <= endDate) {
+                daysInYear.push(dateToString(currentDate));
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            // Divide days into lines
+            const daysPerLine = Math.ceil(daysInYear.length / timelineLines);
+            const container = document.createElement('div');
+            container.className = 'timeline-container';
+            
+            // Create timeline rows
+            for (let lineIdx = 0; lineIdx < timelineLines; lineIdx++) {
+                const startIdx = lineIdx * daysPerLine;
+                const endIdx = Math.min(startIdx + daysPerLine, daysInYear.length);
+                const lineDays = daysInYear.slice(startIdx, endIdx);
+                
+                // Create header row for this line
+                const headerRow = document.createElement('div');
+                headerRow.className = 'timeline-row-header';
+                lineDays.forEach((dateKey, dayIdx) => {
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'timeline-day-header';
+                    const date = new Date(dateKey + 'T00:00:00');
+                    // Show day number, but only for first of month or every 10th day to reduce clutter
+                    if (date.getDate() === 1 || (startIdx + dayIdx) % 10 === 0) {
+                        dayHeader.textContent = date.getDate();
+                    }
+                    headerRow.appendChild(dayHeader);
+                });
+                container.appendChild(headerRow);
+                
+                const row = document.createElement('div');
+                row.className = 'timeline-row';
+                
+                // Add month markers
+                let lastMonth = -1;
+                lineDays.forEach((dateKey, dayIdx) => {
+                    const date = new Date(dateKey + 'T00:00:00');
+                    const month = date.getMonth();
+                    const dayOfMonth = date.getDate();
+                    
+                    // Add month marker at start of each month
+                    if (month !== lastMonth && dayOfMonth <= 3) {
+                        const marker = document.createElement('div');
+                        marker.className = 'timeline-month-marker';
+                        marker.textContent = monthNames[month].substring(0, 3);
+                        marker.style.left = `${dayIdx * 14}px`;
+                        row.appendChild(marker);
+                        lastMonth = month;
+                    }
+                });
+                
+                // Create day cells
+                lineDays.forEach((dateKey, dayIdx) => {
+                    const date = new Date(dateKey + 'T00:00:00');
+                    const dayEvents = getEventsForDate(dateKey);
+                    
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'timeline-day';
+                    dayDiv.setAttribute('data-date', dateKey);
+                    dayDiv.onmousedown = (e) => handleDayMouseDown(e, dateKey);
+                    dayDiv.onmouseenter = (e) => handleDayMouseEnter(e, dateKey);
+                    dayDiv.onclick = (e) => handleDayClick(e, dateKey);
+                    
+                    // Add day number label (only for first of month)
+                    if (date.getDate() === 1) {
+                        const label = document.createElement('div');
+                        label.className = 'timeline-day-label';
+                        label.textContent = monthNames[date.getMonth()].substring(0, 3) + ' ' + date.getDate();
+                        dayDiv.appendChild(label);
+                    }
+                    
+                    // Create events container
+                    const eventsContainer = document.createElement('div');
+                    eventsContainer.className = 'timeline-day-events';
+                    
+                    // Stack events vertically
+                    dayEvents.forEach((evt, evtIdx) => {
+                        const eventIdx = events.indexOf(evt);
+                        const eventDiv = document.createElement('div');
+                        eventDiv.className = 'timeline-event';
+                        eventDiv.setAttribute('data-event-idx', eventIdx);
+                        eventDiv.style.background = evt.color;
+                        eventDiv.onmousedown = (e) => handleEventMouseDown(e, eventIdx);
+                        eventDiv.onclick = (e) => handleEventClick(e, eventIdx, dateKey);
+                        eventDiv.textContent = evt.text;
+                        eventsContainer.appendChild(eventDiv);
+                    });
+                    
+                    dayDiv.appendChild(eventsContainer);
+                    row.appendChild(dayDiv);
+                });
+                
+                container.appendChild(row);
+            }
+            
+            timelineView.appendChild(container);
+            
+            // Set container width to match the longest row (all rows should be same width)
+            if (timelineLines === 2 || timelineLines === 4) {
+                const headerRows = container.querySelectorAll('.timeline-row-header');
+                if (headerRows.length > 0) {
+                    // Get the width of the first header row (all rows should be same width)
+                    const firstHeaderWidth = headerRows[0].offsetWidth;
+                    container.style.width = firstHeaderWidth + 'px';
+                }
+            } else {
+                // For 1 line, let it be full width
+                container.style.width = '';
+            }
+        }
+
         function openModal(dateKey) {
             selectedDate = dateKey;
             const modal = document.getElementById('modal');
@@ -894,7 +1249,7 @@
 
         function updateDragCreatePreview() {
             // Clear previous preview
-            document.querySelectorAll('.day.drag-creating').forEach(day => {
+            document.querySelectorAll('.day.drag-creating, .timeline-day.drag-creating').forEach(day => {
                 day.classList.remove('drag-creating');
                 const preview = day.querySelector('.drag-preview-event');
                 if (preview) preview.remove();
@@ -913,12 +1268,12 @@
             const currentDate = new Date(actualStart);
             while (currentDate <= actualEnd) {
                 const dateKey = dateToString(currentDate);
-                const dayEl = document.querySelector(`.day[data-date="${dateKey}"]`);
+                const dayEl = document.querySelector(`.day[data-date="${dateKey}"], .timeline-day[data-date="${dateKey}"]`);
                 if (dayEl && !dayEl.classList.contains('empty')) {
                     dayEl.classList.add('drag-creating');
                     
                     // Add preview event if it's the first day or if there's no event in this day yet
-                    const dayEvents = dayEl.querySelector('.day-events');
+                    const dayEvents = dayEl.querySelector('.day-events, .timeline-day-events');
                     if (dayEvents && !dayEvents.querySelector('.drag-preview-event')) {
                         const preview = document.createElement('div');
                         preview.className = 'drag-preview-event';
@@ -962,8 +1317,8 @@
         function finishDrag() {
             if (!dragState.isDragging) {
                 // Clean up any leftover drag classes even if not dragging
-                document.querySelectorAll('.day.drag-over').forEach(el => el.classList.remove('drag-over'));
-                document.querySelectorAll('.day.drag-creating').forEach(el => {
+                document.querySelectorAll('.day.drag-over, .timeline-day.drag-over').forEach(el => el.classList.remove('drag-over'));
+                document.querySelectorAll('.day.drag-creating, .timeline-day.drag-creating').forEach(el => {
                     el.classList.remove('drag-creating');
                     const preview = el.querySelector('.drag-preview-event');
                     if (preview) preview.remove();
@@ -1027,13 +1382,13 @@
             dragState.justFinishedDrag = true;
             
             // Remove drag classes
-            document.querySelectorAll('.day.drag-over').forEach(el => el.classList.remove('drag-over'));
-            document.querySelectorAll('.day.drag-creating').forEach(el => {
+            document.querySelectorAll('.day.drag-over, .timeline-day.drag-over').forEach(el => el.classList.remove('drag-over'));
+            document.querySelectorAll('.day.drag-creating, .timeline-day.drag-creating').forEach(el => {
                 el.classList.remove('drag-creating');
                 const preview = el.querySelector('.drag-preview-event');
                 if (preview) preview.remove();
             });
-            document.querySelectorAll('.event.dragging').forEach(el => el.classList.remove('dragging'));
+            document.querySelectorAll('.event.dragging, .timeline-event.dragging').forEach(el => el.classList.remove('dragging'));
             
             // Reset flag after a short delay to allow click events
             setTimeout(() => {
@@ -1044,13 +1399,13 @@
         // Add global mouse handlers
         document.addEventListener('mouseup', function(e) {
             if (dragState.isDragging) {
-                // Find which day we're over
-                const dayEl = e.target.closest('.day');
+                // Find which day we're over (check both calendar and timeline days)
+                const dayEl = e.target.closest('.day, .timeline-day');
                 if (dayEl && dayEl.dataset.date) {
                     dragState.endDate = dayEl.dataset.date;
                 } else {
                     // If we're not over a day, try to find the day from the element
-                    const dayFromElement = e.target.closest('.day[data-date]');
+                    const dayFromElement = e.target.closest('.day[data-date], .timeline-day[data-date]');
                     if (dayFromElement) {
                         dragState.endDate = dayFromElement.dataset.date;
                     }
@@ -1080,7 +1435,13 @@
                     if (dragState.draggedEvent) {
                         dragState.dragType = 'move';
                         const eventEl = document.querySelector(`[data-event-idx="${dragState.draggedEventIdx}"]`);
-                        if (eventEl) eventEl.classList.add('dragging');
+                        if (eventEl) {
+                            eventEl.classList.add('dragging');
+                            // Also add dragging class for timeline events
+                            if (eventEl.classList.contains('timeline-event')) {
+                                eventEl.classList.add('dragging');
+                            }
+                        }
                     } else if (dragState.startDate) {
                         dragState.dragType = 'create';
                         updateDragCreatePreview();
@@ -1091,15 +1452,15 @@
             // Handle drag updates
             if (dragState.isDragging) {
                 if (dragState.dragType === 'create') {
-                    const dayEl = e.target.closest('.day');
+                    const dayEl = e.target.closest('.day, .timeline-day');
                     if (dayEl && dayEl.dataset.date) {
                         dragState.endDate = dayEl.dataset.date;
                         updateDragCreatePreview();
                     }
                 } else if (dragState.dragType === 'move') {
-                    const dayEl = e.target.closest('.day');
+                    const dayEl = e.target.closest('.day, .timeline-day');
                     if (dayEl) {
-                        document.querySelectorAll('.day.drag-over').forEach(el => {
+                        document.querySelectorAll('.day.drag-over, .timeline-day.drag-over').forEach(el => {
                             if (el !== dayEl) el.classList.remove('drag-over');
                         });
                         dayEl.classList.add('drag-over');
@@ -1227,8 +1588,10 @@
         function refreshView() {
             if (currentView === 'year') {
                 renderYear();
-            } else {
+            } else if (currentView === 'month') {
                 renderMonth(currentMonth);
+            } else if (currentView === 'timeline') {
+                renderTimeline();
             }
         }
 
@@ -1511,6 +1874,34 @@
         loadData();
         renderYear();
         renderCategoryKey();
+        
+        // Initialize toggle slider position
+        setTimeout(() => {
+            const toggle = document.getElementById('viewToggle');
+            const slider = document.getElementById('viewToggleSlider');
+            const activeOption = toggle.querySelector('.view-toggle-option.active');
+            if (activeOption) {
+                const optionWidth = activeOption.offsetWidth;
+                const optionLeft = activeOption.offsetLeft;
+                slider.style.width = optionWidth + 'px';
+                slider.style.left = optionLeft + 'px';
+                slider.style.transform = 'translateX(0)';
+            }
+        }, 0);
+        
+        // Update slider position on window resize
+        window.addEventListener('resize', () => {
+            const toggle = document.getElementById('viewToggle');
+            const slider = document.getElementById('viewToggleSlider');
+            const activeOption = toggle.querySelector('.view-toggle-option.active');
+            if (activeOption) {
+                const optionWidth = activeOption.offsetWidth;
+                const optionLeft = activeOption.offsetLeft;
+                slider.style.width = optionWidth + 'px';
+                slider.style.left = optionLeft + 'px';
+                slider.style.transform = 'translateX(0)';
+            }
+        });
         
         // Auto-save notepad on input
         document.getElementById('notepadText').addEventListener('input', function() {
