@@ -24,6 +24,11 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex;
+            flex-direction: column;
+        }
+
+        .header-top {
+            display: flex;
             justify-content: space-between;
             align-items: flex-start;
             flex-wrap: wrap;
@@ -115,17 +120,56 @@
             display: none;
         }
 
-        .view-btn {
-            background: #4CAF50;
+        .view-toggle {
+            display: flex;
+            background: #e0e0e0;
+            border-radius: 8px;
+            padding: 4px;
+            position: relative;
+            gap: 0;
+        }
+
+        .view-toggle-option {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: transparent;
+            color: #666;
+            position: relative;
+            z-index: 1;
+            white-space: nowrap;
+        }
+
+        .view-toggle-option.active {
             color: white;
         }
 
-        .view-btn:hover {
-            background: #45a049;
+        .view-toggle-slider {
+            position: absolute;
+            top: 4px;
+            height: calc(100% - 8px);
+            background: #4CAF50;
+            border-radius: 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
         }
 
-        .view-btn.active {
-            background: #2e7d32;
+        .view-toggle-option:hover:not(.active) {
+            color: #333;
+        }
+
+        .secondary-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            justify-content: flex-end;
         }
 
 
@@ -733,6 +777,7 @@
             margin-bottom: 5px;
             min-height: 20px;
             position: relative;
+            width: fit-content;
         }
 
         .timeline-day-header {
@@ -747,22 +792,32 @@
 </head>
 <body>
     <div class="header">
-        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-            <div>
-                <h1>Year Ahead <span id="currentYearDisplay"></span></h1>
-                <div class="tagline">A simple visual planner for your year ahead</div>
-                <span class="save-indicator" id="saveIndicator">
-                    <span class="icon">✓</span>
-                    <span>Saved</span>
-                </span>
+        <div class="header-top">
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <div>
+                    <h1>Year Ahead <span id="currentYearDisplay"></span></h1>
+                    <div class="tagline">A simple visual planner for your year ahead</div>
+                    <span class="save-indicator" id="saveIndicator">
+                        <span class="icon">✓</span>
+                        <span>Saved</span>
+                    </span>
+                </div>
+                <div class="data-controls">
+                    <button class="data-btn export-btn" onclick="exportData()">Export Data</button>
+                    <button class="data-btn import-btn" onclick="document.getElementById('importFile').click()">Import Data</button>
+                    <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+                </div>
             </div>
-            <div class="data-controls">
-                <button class="data-btn export-btn" onclick="exportData()">Export Data</button>
-                <button class="data-btn import-btn" onclick="document.getElementById('importFile').click()">Import Data</button>
-                <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+            <div class="controls">
+                <div class="view-toggle" id="viewToggle">
+                    <div class="view-toggle-slider" id="viewToggleSlider"></div>
+                    <button class="view-toggle-option active" data-view="year" onclick="setView('year', this)">Calendar Year</button>
+                    <button class="view-toggle-option" data-view="timeline" onclick="setView('timeline', this)">Timeline Year</button>
+                    <button class="view-toggle-option" data-view="month" onclick="setView('month', this)">Single Month</button>
+                </div>
             </div>
         </div>
-        <div class="controls">
+        <div class="secondary-controls">
             <select id="yearSelect" style="padding: 10px; border-radius: 6px; border: 1px solid #ddd;" onchange="changeYear()">
                 <option value="2026">2026</option>
                 <option value="2027">2027</option>
@@ -770,9 +825,6 @@
                 <option value="2029">2029</option>
                 <option value="2030">2030</option>
             </select>
-            <button class="view-btn active" onclick="setView('year')">Calendar Year</button>
-            <button class="view-btn" onclick="setView('month')">Single Month</button>
-            <button class="view-btn" onclick="setView('timeline')">Timeline Year</button>
             <select id="monthSelect" style="padding: 10px; border-radius: 6px; border: 1px solid #ddd; display: none;" onchange="changeMonth()">
                 <option value="0">January</option>
                 <option value="1">February</option>
@@ -878,10 +930,27 @@
                            'July', 'August', 'September', 'October', 'November', 'December'];
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-        function setView(view) {
+        function setView(view, buttonElement) {
             currentView = view;
-            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            
+            // Update toggle slider position
+            const toggle = document.getElementById('viewToggle');
+            const slider = document.getElementById('viewToggleSlider');
+            const options = toggle.querySelectorAll('.view-toggle-option');
+            
+            // Remove active class from all options
+            options.forEach(opt => opt.classList.remove('active'));
+            
+            // Find the clicked option and add active class
+            const activeOption = buttonElement || toggle.querySelector(`[data-view="${view}"]`);
+            activeOption.classList.add('active');
+            
+            // Calculate slider position
+            const optionWidth = activeOption.offsetWidth;
+            const optionLeft = activeOption.offsetLeft;
+            slider.style.width = optionWidth + 'px';
+            slider.style.left = optionLeft + 'px';
+            slider.style.transform = 'translateX(0)';
             
             if (view === 'year') {
                 document.getElementById('yearView').style.display = 'grid';
@@ -1023,29 +1092,29 @@
             const container = document.createElement('div');
             container.className = 'timeline-container';
             
-            // Create header row with day numbers
-            const headerRow = document.createElement('div');
-            headerRow.className = 'timeline-row-header';
-            daysInYear.forEach((dateKey, idx) => {
-                const dayHeader = document.createElement('div');
-                dayHeader.className = 'timeline-day-header';
-                const date = new Date(dateKey + 'T00:00:00');
-                // Show day number, but only for first of month or every 10th day to reduce clutter
-                if (date.getDate() === 1 || idx % 10 === 0) {
-                    dayHeader.textContent = date.getDate();
-                }
-                headerRow.appendChild(dayHeader);
-            });
-            container.appendChild(headerRow);
-            
             // Create timeline rows
             for (let lineIdx = 0; lineIdx < timelineLines; lineIdx++) {
-                const row = document.createElement('div');
-                row.className = 'timeline-row';
-                
                 const startIdx = lineIdx * daysPerLine;
                 const endIdx = Math.min(startIdx + daysPerLine, daysInYear.length);
                 const lineDays = daysInYear.slice(startIdx, endIdx);
+                
+                // Create header row for this line
+                const headerRow = document.createElement('div');
+                headerRow.className = 'timeline-row-header';
+                lineDays.forEach((dateKey, dayIdx) => {
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'timeline-day-header';
+                    const date = new Date(dateKey + 'T00:00:00');
+                    // Show day number, but only for first of month or every 10th day to reduce clutter
+                    if (date.getDate() === 1 || (startIdx + dayIdx) % 10 === 0) {
+                        dayHeader.textContent = date.getDate();
+                    }
+                    headerRow.appendChild(dayHeader);
+                });
+                container.appendChild(headerRow);
+                
+                const row = document.createElement('div');
+                row.className = 'timeline-row';
                 
                 // Add month markers
                 let lastMonth = -1;
@@ -1113,11 +1182,11 @@
             
             // Set container width to match the longest row (all rows should be same width)
             if (timelineLines === 2 || timelineLines === 4) {
-                const rows = container.querySelectorAll('.timeline-row');
-                if (rows.length > 0) {
-                    // Get the width of the first row (all rows should be same width)
-                    const firstRowWidth = rows[0].offsetWidth;
-                    container.style.width = firstRowWidth + 'px';
+                const headerRows = container.querySelectorAll('.timeline-row-header');
+                if (headerRows.length > 0) {
+                    // Get the width of the first header row (all rows should be same width)
+                    const firstHeaderWidth = headerRows[0].offsetWidth;
+                    container.style.width = firstHeaderWidth + 'px';
                 }
             } else {
                 // For 1 line, let it be full width
@@ -1805,6 +1874,34 @@
         loadData();
         renderYear();
         renderCategoryKey();
+        
+        // Initialize toggle slider position
+        setTimeout(() => {
+            const toggle = document.getElementById('viewToggle');
+            const slider = document.getElementById('viewToggleSlider');
+            const activeOption = toggle.querySelector('.view-toggle-option.active');
+            if (activeOption) {
+                const optionWidth = activeOption.offsetWidth;
+                const optionLeft = activeOption.offsetLeft;
+                slider.style.width = optionWidth + 'px';
+                slider.style.left = optionLeft + 'px';
+                slider.style.transform = 'translateX(0)';
+            }
+        }, 0);
+        
+        // Update slider position on window resize
+        window.addEventListener('resize', () => {
+            const toggle = document.getElementById('viewToggle');
+            const slider = document.getElementById('viewToggleSlider');
+            const activeOption = toggle.querySelector('.view-toggle-option.active');
+            if (activeOption) {
+                const optionWidth = activeOption.offsetWidth;
+                const optionLeft = activeOption.offsetLeft;
+                slider.style.width = optionWidth + 'px';
+                slider.style.left = optionLeft + 'px';
+                slider.style.transform = 'translateX(0)';
+            }
+        });
         
         // Auto-save notepad on input
         document.getElementById('notepadText').addEventListener('input', function() {
