@@ -113,5 +113,14 @@
     </div>
 
     <script type="module" src="js/main.js"></script>
+    <script>
+        // Error handling for module loading
+        window.addEventListener('error', (e) => {
+            console.error('Error loading module:', e);
+            if (e.message.includes('Failed to fetch') || e.message.includes('CORS')) {
+                alert('Error: This app requires a web server to run.\n\nPlease use a local server like:\n- Python: python -m http.server\n- Node: npx serve\n- VS Code: Live Server extension');
+            }
+        });
+    </script>
 </body>
 </html>

@@ -26,40 +26,60 @@ import { initInstructions } from './ui/instructions.js';
  * Initialize the application
  */
 function init() {
-    // Set callback for year change to avoid circular dependency
-    setYearChangeCallback(renderCategoryKey);
+    try {
+        console.log('Initializing Year Ahead Planner...');
+        
+        // Set callback for year change to avoid circular dependency
+        setYearChangeCallback(renderCategoryKey);
 
-    // Set year selector to current year
-    const yearSelect = getById('yearSelect');
-    if (yearSelect) {
-        yearSelect.value = store.get('currentYear');
+        // Set year selector to current year
+        const yearSelect = getById('yearSelect');
+        if (yearSelect) {
+            yearSelect.value = store.get('currentYear');
+        } else {
+            console.error('yearSelect element not found!');
+        }
+
+        // Update year display
+        updateYearDisplay();
+
+        // Load saved data
+        loadData();
+
+        // Render initial view
+        console.log('Rendering year view...');
+        renderYear();
+        
+        // Check if yearView was populated
+        const yearView = getById('yearView');
+        if (yearView && yearView.children.length === 0) {
+            console.error('Year view rendered but no content!');
+        } else {
+            console.log(`Year view rendered with ${yearView?.children.length || 0} months`);
+        }
+
+        // Render category key
+        renderCategoryKey();
+
+        // Initialize UI components
+        initModalListeners();
+        initNotepad();
+        initInstructions();
+
+        // Initialize drag handlers
+        initGlobalDragListeners();
+
+        // Initialize view toggle slider
+        initViewToggleSlider();
+
+        // Attach global event handlers
+        attachGlobalHandlers();
+        
+        console.log('Initialization complete!');
+    } catch (error) {
+        console.error('Error during initialization:', error);
+        alert('Error initializing application. Check console for details.');
     }
-
-    // Update year display
-    updateYearDisplay();
-
-    // Load saved data
-    loadData();
-
-    // Render initial view
-    renderYear();
-
-    // Render category key
-    renderCategoryKey();
-
-    // Initialize UI components
-    initModalListeners();
-    initNotepad();
-    initInstructions();
-
-    // Initialize drag handlers
-    initGlobalDragListeners();
-
-    // Initialize view toggle slider
-    initViewToggleSlider();
-
-    // Attach global event handlers
-    attachGlobalHandlers();
 }
 
 /**
@@ -128,6 +148,14 @@ if (document.readyState === 'loading') {
 } else {
     init();
 }
+
+// Error handling
+window.addEventListener('error', (e) => {
+    console.error('Application error:', e.error);
+});
+
+// Log initialization
+console.log('Year Ahead Planner: Initializing...');
 
 // Export for potential use in HTML onclick attributes (backward compatibility)
 window.setView = setView;

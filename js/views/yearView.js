@@ -12,17 +12,24 @@ import { attachDayEventHandlers } from './viewController.js';
  */
 export function renderYear() {
     const yearView = getById('yearView');
-    if (!yearView) return;
+    if (!yearView) {
+        console.error('yearView element not found!');
+        return;
+    }
 
+    console.log('Clearing year view...');
     clearChildren(yearView);
 
     const currentYear = store.get('currentYear');
+    console.log(`Rendering year ${currentYear}...`);
 
     for (let month = 0; month < 12; month++) {
         const monthDiv = createElement('div');
         renderCalendar(month, currentYear, monthDiv);
         yearView.appendChild(monthDiv);
     }
+
+    console.log(`Rendered ${yearView.children.length} months`);
 
     // Attach event handlers after rendering
     attachDayEventHandlers(yearView);
