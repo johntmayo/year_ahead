@@ -1,5 +1,5 @@
 /* ============================================
-   THEME SYSTEM - Glass & Glow & Tactile Impressionism
+   THEME SYSTEM - Glass & Glow (Light/Dark Mode)
    ============================================ */
 
 /* Shared CSS Variables */
@@ -83,64 +83,44 @@
     --blur-soft: blur(10px);
 }
 
-/* Tactile Impressionism Theme */
-[data-theme="tactile"] {
-    /* Typography */
-    --font-family-header: 'Cormorant Garamond', serif;
-    --font-family-body: 'EB Garamond', serif;
-    --font-family-mono: 'EB Garamond', serif;
+/* Dark Mode Overrides */
+[data-theme="glass-glow"][data-mode="dark"] {
+    /* Colors - Dark Mode */
+    --color-primary: #7FA8D4;
+    --color-primary-dark: #5B8FC7;
+    --color-secondary: #9BB5D9;
+    --color-secondary-dark: #7FA8D4;
+    --color-success: #4CAF50;
+    --color-warning: #FF9800;
+    --color-danger: #F44336;
     
-    /* Colors - Natural Pigments, Refined */
-    --color-primary: #5D4037;
-    --color-primary-dark: #3E2723;
-    --color-secondary: #6D4C41;
-    --color-secondary-dark: #4E342E;
-    --color-success: #558B2F;
-    --color-warning: #E65100;
-    --color-danger: #BF360C;
+    /* Text colors */
+    --text-ink: #E5E5E7;
+    --text-primary: #E5E5E7;
+    --text-secondary: #B0B0B5;
+    --text-muted: #8A8A90;
+    --text-light: #6A6A70;
     
-    /* Text colors - Ink */
-    --text-ink: #1B1B1B;
-    --text-primary: #1B1B1B;
-    --text-secondary: #4E342E;
-    --text-muted: #5D4037;
-    --text-light: #8D6E63;
-    
-    /* Background colors - Artful Paper Texture */
-    --bg-canvas: #F5F1EB;
-    --bg-body: 
-        radial-gradient(circle at 20% 50%, rgba(220, 200, 180, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(200, 180, 160, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(240, 220, 200, 0.05) 0%, transparent 50%),
-        linear-gradient(180deg, #F8F4EE 0%, #F5F1EB 50%, #F2EEE8 100%);
-    --bg-card: rgba(250, 246, 240, 0.92);
-    --bg-notepad: rgba(252, 248, 242, 0.94);
-    --bg-day-header: rgba(245, 240, 233, 0.88);
-    --bg-empty-day: rgba(240, 235, 228, 0.75);
+    /* Background colors - Dark, rich */
+    --bg-canvas: #1A1A1B;
+    --bg-body: linear-gradient(135deg, #1E1E1F 0%, #252526 50%, #2A2A2B 100%);
+    --bg-card: rgba(30, 30, 31, 0.85);
+    --bg-notepad: rgba(35, 35, 36, 0.9);
+    --bg-day-header: rgba(40, 40, 41, 0.95);
+    --bg-empty-day: rgba(25, 25, 26, 0.7);
     
     /* Borders */
-    --border-light: rgba(139, 125, 107, 0.25);
-    --border-glass: rgba(107, 91, 79, 0.35);
-    --border-notepad: rgba(139, 125, 107, 0.25);
+    --border-light: rgba(100, 100, 105, 0.4);
+    --border-glass: rgba(120, 120, 125, 0.5);
+    --border-notepad: rgba(90, 90, 95, 0.4);
     
-    /* Shadows - Pressed */
-    --shadow-sm: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: inset 0 1px 3px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
-    --shadow-lg: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
-    --shadow-xl: inset 0 2px 5px rgba(0, 0, 0, 0.25), 0 6px 12px rgba(0, 0, 0, 0.2);
-    --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.2);
-    
-    /* Border radius - Organic/Deckled */
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --radius-xl: 18px;
-    --radius-2xl: 22px;
-    --radius-3xl: 26px;
-    
-    /* Blur */
-    --blur-glass: none;
-    --blur-soft: none;
+    /* Shadows - Dark mode shadows */
+    --shadow-ambient: 0 0 40px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3), var(--shadow-ambient);
+    --shadow-xl: 0 12px 40px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4), var(--shadow-ambient);
+    --shadow-modal: 0 20px 60px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.5);
 }
 
 /* ============================================
@@ -179,45 +159,6 @@ body {
     transition: all var(--transition-smooth);
 }
 
-[data-theme="tactile"] .header {
-    background-image: 
-        radial-gradient(ellipse at 30% 20%, rgba(180, 160, 140, 0.08) 0%, transparent 40%),
-        radial-gradient(ellipse at 70% 80%, rgba(160, 140, 120, 0.06) 0%, transparent 40%),
-        linear-gradient(45deg, transparent 30%, rgba(200, 180, 160, 0.03) 50%, transparent 70%);
-    position: relative;
-}
-
-[data-theme="tactile"] .header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-        repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 2px,
-            rgba(139, 125, 107, 0.03) 2px,
-            rgba(139, 125, 107, 0.03) 4px
-        ),
-        repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 2px,
-            rgba(139, 125, 107, 0.02) 2px,
-            rgba(139, 125, 107, 0.02) 4px
-        );
-    pointer-events: none;
-    opacity: 0.6;
-}
-
-[data-theme="tactile"] .header > * {
-    position: relative;
-    z-index: 1;
-}
-
 .header-top {
     display: flex;
     justify-content: space-between;
@@ -243,12 +184,6 @@ h1 {
     background-clip: text;
     font-weight: 600;
     font-optical-sizing: auto;
-}
-
-[data-theme="tactile"] h1 {
-    font-style: italic;
-    letter-spacing: 0.05em;
-    color: var(--text-ink);
 }
 
 .tagline {
@@ -334,18 +269,9 @@ button {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-[data-theme="tactile"] button:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-1px);
-}
-
 button:active {
     transform: translateY(0);
     box-shadow: var(--shadow-sm);
-}
-
-[data-theme="tactile"] button:active {
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Save Indicator */
@@ -472,15 +398,6 @@ button:active {
     transition: all var(--transition-smooth);
 }
 
-[data-theme="tactile"] .year-string {
-    height: 3px;
-    background: linear-gradient(to right,
-        rgba(107, 68, 35, 0.3) 0%,
-        rgba(139, 69, 19, 0.5) 50%,
-        rgba(107, 68, 35, 0.3) 100%);
-    border-radius: 0;
-}
-
 /* ============================================
    CATEGORY KEY
    ============================================ */
@@ -494,27 +411,6 @@ button:active {
     backdrop-filter: var(--blur-soft);
     border: 1px solid var(--border-glass);
     position: relative;
-}
-
-[data-theme="tactile"] .category-key::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        radial-gradient(circle at 50% 50%, rgba(139, 125, 107, 0.03) 0%, transparent 70%),
-        repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 1px,
-            rgba(139, 125, 107, 0.02) 1px,
-            rgba(139, 125, 107, 0.02) 2px
-        );
-    border-radius: var(--radius-2xl);
-    pointer-events: none;
-    opacity: 0.5;
 }
 
 .category-key > * {
@@ -532,12 +428,6 @@ button:active {
 [data-theme="glass-glow"] .category-key h3 {
     font-weight: 600;
     font-optical-sizing: auto;
-}
-
-[data-theme="tactile"] .category-key h3 {
-    font-style: italic;
-    font-weight: 600;
-    letter-spacing: 0.03em;
 }
 
 .category-items {
@@ -571,10 +461,6 @@ button:active {
 
 [data-theme="glass-glow"] .category-item input[type="text"]:focus {
     box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
-}
-
-[data-theme="tactile"] .category-item input[type="text"]:focus {
-    box-shadow: 0 0 0 2px rgba(93, 64, 55, 0.15);
 }
 
 .category-item input[type="color"] {
@@ -629,11 +515,6 @@ button:active {
 [data-theme="glass-glow"] .instructions-panel h3 {
     font-weight: 600;
     font-optical-sizing: auto;
-}
-
-[data-theme="tactile"] .instructions-panel h3 {
-    font-style: italic;
-    font-weight: 600;
 }
 
 .instructions-panel ul {
@@ -702,27 +583,6 @@ button:active {
     position: relative;
 }
 
-[data-theme="tactile"] .notepad::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        radial-gradient(circle at 70% 70%, rgba(139, 125, 107, 0.025) 0%, transparent 60%),
-        repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 3px,
-            rgba(139, 125, 107, 0.015) 3px,
-            rgba(139, 125, 107, 0.015) 4px
-        );
-    border-radius: var(--radius-2xl);
-    pointer-events: none;
-    opacity: 0.5;
-}
-
 .notepad > * {
     position: relative;
     z-index: 1;
@@ -758,11 +618,6 @@ button:active {
 }
 
 [data-theme="glass-glow"] .notepad-header h3 {
-    font-weight: 600;
-}
-
-[data-theme="tactile"] .notepad-header h3 {
-    font-style: italic;
     font-weight: 600;
 }
 
@@ -811,10 +666,6 @@ button:active {
 
 [data-theme="glass-glow"] .notepad textarea:focus {
     box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
-}
-
-[data-theme="tactile"] .notepad textarea:focus {
-    box-shadow: 0 0 0 2px rgba(93, 64, 55, 0.15);
 }
 
 /* ============================================
@@ -871,11 +722,6 @@ button:active {
     font-optical-sizing: auto;
 }
 
-[data-theme="tactile"] .month-header {
-    font-style: italic;
-    color: var(--text-ink);
-}
-
 /* Calendar Grid */
 .calendar {
     display: grid;
@@ -924,9 +770,13 @@ button:active {
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-[data-theme="tactile"] .day:hover {
-    background: rgba(243, 239, 224, 0.98);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+[data-theme="glass-glow"][data-mode="dark"] .day:hover {
+    background: rgba(45, 45, 46, 0.95);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+[data-theme="glass-glow"][data-mode="dark"] .timeline-day:hover {
+    background: rgba(45, 45, 46, 0.9);
 }
 
 .day-events {
@@ -984,14 +834,6 @@ button:active {
     color: var(--text-ink);
 }
 
-[data-theme="tactile"] .event {
-    font-weight: 500;
-    font-family: var(--font-family-body);
-    text-transform: none;
-    letter-spacing: 0;
-    color: var(--text-ink);
-}
-
 .event:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
@@ -1017,10 +859,6 @@ button:active {
 /* Drag States */
 .day.drag-over {
     background: rgba(102, 126, 234, 0.1);
-}
-
-[data-theme="tactile"] .day.drag-over {
-    background: rgba(107, 68, 35, 0.15);
 }
 
 .day.drag-creating {
@@ -1118,11 +956,6 @@ button:active {
     font-optical-sizing: auto;
 }
 
-[data-theme="tactile"] .modal-header {
-    font-style: italic;
-    color: var(--text-ink);
-}
-
 .event-list {
     margin-bottom: 20px;
 }
@@ -1172,10 +1005,6 @@ button:active {
     box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
 }
 
-[data-theme="tactile"] .event-item input[type="text"]:focus {
-    box-shadow: 0 0 0 2px rgba(93, 64, 55, 0.15);
-}
-
 .event-item input[type="date"] {
     padding: 10px 12px;
     border: 1px solid var(--border-light);
@@ -1194,10 +1023,6 @@ button:active {
 
 [data-theme="glass-glow"] .event-item input[type="date"]:focus {
     box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
-}
-
-[data-theme="tactile"] .event-item input[type="date"]:focus {
-    box-shadow: 0 0 0 2px rgba(93, 64, 55, 0.15);
 }
 
 .event-item .color-picker-mini {
@@ -1249,10 +1074,6 @@ button:active {
     font-size: var(--font-size-sm);
     color: var(--text-muted);
     font-family: var(--font-family-mono);
-}
-
-[data-theme="tactile"] .event-date-range {
-    font-family: var(--font-family-body);
 }
 
 .add-event-btn {
@@ -1403,10 +1224,6 @@ button:active {
     font-family: var(--font-family-header);
 }
 
-[data-theme="tactile"] .timeline-month-marker {
-    font-style: italic;
-}
-
 .timeline-row-header {
     display: flex;
     gap: 0;
@@ -1456,10 +1273,6 @@ select:focus {
 
 [data-theme="glass-glow"] select:focus {
     box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1) !important;
-}
-
-[data-theme="tactile"] select:focus {
-    box-shadow: 0 0 0 2px rgba(93, 64, 55, 0.15) !important;
 }
 
 /* ============================================

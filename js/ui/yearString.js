@@ -65,17 +65,15 @@ export function renderYearString() {
         const position = index * segmentWidth;
         
         // Color based on density
-        const theme = document.documentElement.getAttribute('data-theme');
+        const mode = document.documentElement.getAttribute('data-mode') || 'light';
         let color;
         
-        if (theme === 'tactile') {
-            // Tactile: refined earth tones
-            const r = Math.floor(93 + intensity * 20);
-            const g = Math.floor(64 + intensity * 18);
-            const b = Math.floor(55 + intensity * 16);
-            color = `rgb(${r}, ${g}, ${b})`;
+        if (mode === 'dark') {
+            // Dark mode: lighter tones for visibility
+            const base = 180 + intensity * 40; // Light gray to white
+            color = `rgb(${Math.floor(base)}, ${Math.floor(base + intensity * 3)}, ${Math.floor(base + intensity * 5)})`;
         } else {
-            // Glass & Glow: sophisticated monochrome with subtle warmth
+            // Light mode: sophisticated monochrome with subtle warmth
             const base = 44 + intensity * 25; // Deep charcoal to medium gray
             color = `rgb(${Math.floor(base)}, ${Math.floor(base + intensity * 3)}, ${Math.floor(base + intensity * 5)})`;
         }
