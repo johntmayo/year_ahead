@@ -1304,13 +1304,17 @@ select:focus {
     border: 1px solid var(--border-glass);
     overflow-x: auto;
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
     gap: 0;
     position: relative;
+    align-items: flex-start;
+    align-content: flex-start;
 }
 
 .paragraph-day {
-    width: calc(100% / 20);
+    flex: 0 0 auto;
+    width: 5%;
     min-width: 40px;
     aspect-ratio: 1 / 1;
     background: var(--bg-card);
@@ -1324,6 +1328,7 @@ select:focus {
     user-select: none;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 /* Remove border on right side to create seamless flow */
@@ -1476,14 +1481,12 @@ select:focus {
 @media (max-width: 1200px) {
     .paragraph-day {
         width: calc(100% / 18);
-        min-width: 38px;
     }
 }
 
 @media (max-width: 900px) {
     .paragraph-day {
         width: calc(100% / 15);
-        min-width: 35px;
     }
 }
 
@@ -1506,13 +1509,11 @@ select:focus {
     
     .paragraph-day {
         width: calc(100% / 12);
-        min-width: 32px;
     }
 }
 
 @media (max-width: 480px) {
     .paragraph-day {
         width: calc(100% / 10);
-        min-width: 28px;
     }
 }
