@@ -37,148 +37,136 @@ export function renderParagraph() {
     const isLeapYear = (currentYear % 4 === 0 && currentYear % 100 !== 0) || (currentYear % 400 === 0);
     const daysInYear = isLeapYear ? 366 : 365;
 
-    // Create container for the paragraph flow
-    const container = createElement('div');
-    container.className = 'paragraph-container';
+    // Track current month for transition markers
+    let currentMonth = -1;
+    let allDays = [];
 
-    // Create month groups
-    const monthGroups = [];
-    let dayIndex = 0;
-
+    // Generate all days of the year as a flat array
     for (let month = 0; month < 12; month++) {
         const monthStart = new Date(currentYear, month, 1);
         const monthEnd = new Date(currentYear, month + 1, 0);
         const daysInMonth = monthEnd.getDate();
 
-        const monthGroup = {
-            month,
-            monthName: MONTH_NAMES[month],
-            startIndex: dayIndex,
-            endIndex: dayIndex + daysInMonth - 1,
-            days: []
-        };
-
-        // Create days for this month
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(currentYear, month, day);
             const dateKey = dateToString(date);
             const dayOfWeek = date.getDay();
             const dayName = DAY_NAMES[dayOfWeek].charAt(0); // First letter
+            const isFirstDayOfMonth = day === 1;
 
-            monthGroup.days.push({
+            allDays.push({
                 dateKey,
                 day,
                 dayName,
-                date
+                date,
+                month,
+                monthName: MONTH_NAMES[month],
+                isFirstDayOfMonth
             });
-
-            dayIndex++;
         }
-
-        monthGroups.push(monthGroup);
     }
 
-    // Render month groups with watermarks
-    monthGroups.forEach((monthGroup, groupIndex) => {
-        const monthContainer = createElement('div');
-        monthContainer.className = 'paragraph-month-group';
-        monthContainer.dataset.month = monthGroup.month;
+    // Render all days as direct children of paragraphView
+    allDays.forEach((dayData, index) => {
+        const dayCell = createElement('div');
+        dayCell.className = 'paragraph-day';
+        dayCell.dataset.date = dayData.dateKey;
+        
+        // Mark first day of month for styling
+        if (dayData.isFirstDayOfMonth) {
+            dayCell.classList.add('month-start');
+            dayCell.dataset.month = dayData.month;
+            dayCell.dataset.monthName = dayData.monthName;
+        }
 
-        // Month watermark
-        const watermark = createElement('div');
-        watermark.className = 'paragraph-month-watermark';
-        watermark.textContent = monthGroup.monthName.toUpperCase();
-        monthContainer.appendChild(watermark);
+        // Month watermark (positioned absolutely behind cells)
+        if (dayData.isFirstDayOfMonth) {
+            const watermark = createElement('div');
+            watermark.className = 'paragraph-month-watermark';
+            watermark.textContent = dayData.monthName.toUpperCase();
+            watermark.dataset.month = dayData.month;
+            dayCell.appendChild(watermark);
+        }
 
-        // Days container
-        const daysContainer = createElement('div');
-        daysContainer.className = 'paragraph-days';
-
-        // Render each day
-        monthGroup.days.forEach((dayData) => {
-            const dayCell = createElement('div');
-            dayCell.className = 'paragraph-day';
-            dayCell.dataset.date = dayData.dateKey;
-
-            // Day label (top-left)
-            const dayLabel = createElement('div');
-            dayLabel.className = 'paragraph-day-label';
+        // Day label (top-left)
+        const dayLabel = createElement('div');
+        dayLabel.className = 'paragraph-day-label';
+        // Show month abbreviation for first day of month
+        if (dayData.isFirstDayOfMonth) {
+            dayLabel.textContent = `${dayData.monthName.substring(0, 3)} ${dayData.day}`;
+            dayLabel.classList.add('month-label');
+        } else {
             dayLabel.textContent = `${dayData.day} ${dayData.dayName}`;
-            dayCell.appendChild(dayLabel);
+        }
+        dayCell.appendChild(dayLabel);
 
-            // Events container
-            const eventsContainer = createElement('div');
-            eventsContainer.className = 'paragraph-day-events';
+        // Events container
+        const eventsContainer = createElement('div');
+        eventsContainer.className = 'paragraph-day-events';
 
-            // Get events for this day
-            const dayEvents = getEventsForDay(dayData.dateKey);
+        // Get events for this day
+        const dayEvents = getEventsForDay(dayData.dateKey);
 
-            // Render events as highlighter sweeps
-            dayEvents.forEach((evt) => {
-                const eventIdx = getEventIndex(evt);
-                const colorStyle = getEventColorStyle(evt.color, false);
+        // Render events as highlighter sweeps
+        dayEvents.forEach((evt) => {
+            const eventIdx = getEventIndex(evt);
+            const colorStyle = getEventColorStyle(evt.color, false);
 
-                // Check if this is the start of a multi-day event
-                const isEventStart = evt.startDate === dayData.dateKey;
-                const isEventEnd = evt.endDate === dayData.dateKey;
-                const isMultiDay = evt.startDate !== evt.endDate;
+            // Check if this is the start/end of a multi-day event
+            const isEventStart = evt.startDate === dayData.dateKey;
+            const isEventEnd = evt.endDate === dayData.dateKey;
+            const isMultiDay = evt.startDate !== evt.endDate;
 
-                const eventEl = createElement('div');
-                eventEl.className = 'paragraph-event';
-                eventEl.dataset.eventIdx = eventIdx;
-                eventEl.title = escapeAttr(evt.text);
+            const eventEl = createElement('div');
+            eventEl.className = 'paragraph-event';
+            eventEl.dataset.eventIdx = eventIdx;
+            eventEl.title = escapeAttr(evt.text);
 
-                // Apply styling
-                let style = colorStyle;
-                
-                // For multi-day events, we need to handle the flow across line breaks
-                if (isMultiDay) {
-                    // Check if event continues to next day
-                    const nextDay = new Date(dayData.date);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    const nextDateKey = dateToString(nextDay);
-                    const continuesNext = isDateInRange(nextDateKey, evt.startDate, evt.endDate);
+            // Apply styling
+            let style = colorStyle;
+            
+            // For multi-day events, handle flow across line breaks
+            if (isMultiDay) {
+                // Check if event continues to next day
+                const nextDay = new Date(dayData.date);
+                nextDay.setDate(nextDay.getDate() + 1);
+                const nextDateKey = dateToString(nextDay);
+                const continuesNext = isDateInRange(nextDateKey, evt.startDate, evt.endDate);
 
-                    // Check if event continues from previous day
-                    const prevDay = new Date(dayData.date);
-                    prevDay.setDate(prevDay.getDate() - 1);
-                    const prevDateKey = dateToString(prevDay);
-                    const continuesFromPrev = isDateInRange(prevDateKey, evt.startDate, evt.endDate);
+                // Check if event continues from previous day
+                const prevDay = new Date(dayData.date);
+                prevDay.setDate(prevDay.getDate() - 1);
+                const prevDateKey = dateToString(prevDay);
+                const continuesFromPrev = isDateInRange(prevDateKey, evt.startDate, evt.endDate);
 
-                    if (isEventStart && !continuesNext) {
-                        // Single day or end of event
-                        style += ' border-radius: var(--radius-sm);';
-                    } else if (isEventStart) {
-                        // Start of event - round left corners
-                        style += ' border-radius: var(--radius-sm) 0 0 var(--radius-sm);';
-                    } else if (isEventEnd) {
-                        // End of event - round right corners
-                        style += ' border-radius: 0 var(--radius-sm) var(--radius-sm) 0;';
-                    } else {
-                        // Middle of event - no border radius
-                        style += ' border-radius: 0;';
-                    }
+                if (isEventStart && !continuesNext) {
+                    // Single day event (shouldn't happen if isMultiDay is true, but handle it)
+                    style += ' border-radius: 0;';
+                } else if (isEventStart) {
+                    // Start of event - round left corners only
+                    style += ' border-radius: 2px 0 0 2px;';
+                } else if (isEventEnd) {
+                    // End of event - round right corners only
+                    style += ' border-radius: 0 2px 2px 0;';
                 } else {
-                    // Single day event - full border radius
-                    style += ' border-radius: var(--radius-sm);';
+                    // Middle of event - no border radius for seamless flow
+                    style += ' border-radius: 0;';
                 }
+            } else {
+                // Single day event - small border radius
+                style += ' border-radius: 2px;';
+            }
 
-                eventEl.style.cssText = style;
-                // Only show text on the start day of multi-day events, or always for single-day events
-                eventEl.textContent = isEventStart ? escapeHtml(evt.text) : '';
+            eventEl.style.cssText = style;
+            // Only show text on the start day of multi-day events, or always for single-day events
+            eventEl.textContent = isEventStart ? escapeHtml(evt.text) : '';
 
-                eventsContainer.appendChild(eventEl);
-            });
-
-            dayCell.appendChild(eventsContainer);
-            daysContainer.appendChild(dayCell);
+            eventsContainer.appendChild(eventEl);
         });
 
-        monthContainer.appendChild(daysContainer);
-        container.appendChild(monthContainer);
+        dayCell.appendChild(eventsContainer);
+        paragraphView.appendChild(dayCell);
     });
-
-    paragraphView.appendChild(container);
 
     // Attach event handlers
     attachParagraphEventHandlers(paragraphView);

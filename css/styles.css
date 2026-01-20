@@ -1292,7 +1292,7 @@ select:focus {
 }
 
 /* ============================================
-   PARAGRAPH FLOW VIEW
+   PARAGRAPH FLOW VIEW - Continuous Ribbon
    ============================================ */
 
 .paragraph-view {
@@ -1303,74 +1303,18 @@ select:focus {
     backdrop-filter: var(--blur-soft);
     border: 1px solid var(--border-glass);
     overflow-x: auto;
-}
-
-.paragraph-container {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-}
-
-.paragraph-month-group {
-    position: relative;
-    padding: 20px;
-    border-radius: var(--radius-xl);
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: var(--blur-soft);
-    border: 1px dashed var(--border-light);
-    transition: all var(--transition-normal);
-}
-
-[data-mode="dark"] .paragraph-month-group {
-    background: rgba(30, 30, 31, 0.3);
-    border-color: var(--border-light);
-}
-
-.paragraph-month-group:hover {
-    background: rgba(255, 255, 255, 0.4);
-    box-shadow: var(--shadow-md);
-}
-
-[data-mode="dark"] .paragraph-month-group:hover {
-    background: rgba(30, 30, 31, 0.4);
-}
-
-.paragraph-month-watermark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: var(--font-family-header);
-    font-size: 120px;
-    font-weight: 600;
-    color: var(--text-primary);
-    opacity: 0.03;
-    pointer-events: none;
-    z-index: 0;
-    white-space: nowrap;
-    user-select: none;
-}
-
-[data-mode="dark"] .paragraph-month-watermark {
-    opacity: 0.05;
-}
-
-.paragraph-days {
     display: flex;
     flex-wrap: wrap;
-    gap: 2px;
+    gap: 0;
     position: relative;
-    z-index: 1;
 }
 
 .paragraph-day {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
+    width: calc(100% / 20);
+    min-width: 40px;
+    aspect-ratio: 1 / 1;
     background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-light);
     cursor: pointer;
     position: relative;
     display: flex;
@@ -1378,11 +1322,28 @@ select:focus {
     overflow: hidden;
     transition: all var(--transition-fast);
     user-select: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Remove border on right side to create seamless flow */
+.paragraph-day:not(:last-child) {
+    border-right: none;
+}
+
+/* Month start indicator - thicker left border */
+.paragraph-day.month-start {
+    border-left: 2px solid var(--color-primary);
+    border-left-color: rgba(44, 62, 80, 0.3);
+}
+
+[data-mode="dark"] .paragraph-day.month-start {
+    border-left-color: rgba(127, 168, 212, 0.4);
 }
 
 .paragraph-day:hover {
     background: rgba(255, 255, 255, 0.95);
-    transform: scale(1.1);
+    transform: scale(1.05);
     z-index: 2;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
@@ -1402,16 +1363,48 @@ select:focus {
     border-color: var(--color-success);
 }
 
+/* Month watermark - positioned behind cells */
+.paragraph-month-watermark {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    font-family: var(--font-family-header);
+    font-size: clamp(60px, 8vw, 140px);
+    font-weight: 600;
+    color: var(--text-primary);
+    opacity: 0.04;
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+    user-select: none;
+    width: 100%;
+    text-align: left;
+    padding-left: 4px;
+    line-height: 1;
+}
+
+[data-mode="dark"] .paragraph-month-watermark {
+    opacity: 0.06;
+}
+
 .paragraph-day-label {
     position: absolute;
-    top: 2px;
-    left: 3px;
+    top: 3px;
+    left: 4px;
     font-family: var(--font-family-mono);
-    font-size: 7px;
+    font-size: clamp(8px, 1.2vw, 10px);
     color: var(--text-muted);
     line-height: 1;
     pointer-events: none;
-    z-index: 1;
+    z-index: 2;
+    font-weight: 500;
+}
+
+.paragraph-day-label.month-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: clamp(7px, 1vw, 9px);
 }
 
 .paragraph-day-events {
@@ -1423,6 +1416,7 @@ select:focus {
     display: flex;
     flex-direction: column;
     pointer-events: none;
+    z-index: 1;
 }
 
 .paragraph-event {
@@ -1431,7 +1425,7 @@ select:focus {
     left: 0;
     right: 0;
     bottom: 0;
-    font-size: 8px;
+    font-size: clamp(7px, 1vw, 9px);
     padding: 2px 4px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1446,10 +1440,12 @@ select:focus {
     align-items: center;
     transition: all var(--transition-fast);
     z-index: 2;
+    /* Ensure events touch perfectly - no gaps */
+    margin: 0;
 }
 
 .paragraph-event:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
     z-index: 3;
 }
@@ -1462,11 +1458,11 @@ select:focus {
     display: block;
     background: rgba(76, 175, 80, 0.3);
     border: 1px dashed var(--color-success);
-    font-size: 8px;
+    font-size: clamp(7px, 1vw, 9px);
     padding: 2px 4px;
     color: var(--color-success);
     font-weight: 500;
-    border-radius: var(--radius-sm);
+    border-radius: 2px;
 }
 
 .drag-preview-event {
@@ -1476,21 +1472,18 @@ select:focus {
     pointer-events: none;
 }
 
-/* Responsive adjustments */
-@media (max-width: 480px) {
+/* Responsive adjustments for paragraph view */
+@media (max-width: 1200px) {
     .paragraph-day {
-        width: 24px;
-        height: 24px;
-        min-width: 24px;
-        min-height: 24px;
+        width: calc(100% / 18);
+        min-width: 38px;
     }
-    
-    .paragraph-day-label {
-        font-size: 5px;
-    }
-    
-    .paragraph-month-watermark {
-        font-size: 60px;
+}
+
+@media (max-width: 900px) {
+    .paragraph-day {
+        width: calc(100% / 15);
+        min-width: 35px;
     }
 }
 
@@ -1512,23 +1505,14 @@ select:focus {
     }
     
     .paragraph-day {
-        width: 28px;
-        height: 28px;
+        width: calc(100% / 12);
+        min-width: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .paragraph-day {
+        width: calc(100% / 10);
         min-width: 28px;
-        min-height: 28px;
-    }
-    
-    .paragraph-day-label {
-        font-size: 6px;
-        top: 1px;
-        left: 2px;
-    }
-    
-    .paragraph-month-watermark {
-        font-size: 80px;
-    }
-    
-    .paragraph-month-group {
-        padding: 15px;
     }
 }
