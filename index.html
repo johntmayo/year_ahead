@@ -1071,6 +1071,7 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const dayEvents = getEventsForDate(dateKey);
+                const currentRow = getRowForDay(day, firstDay);
                 
                 html += `<div class="day" data-date="${dateKey}" onmousedown="handleDayMouseDown(event, '${dateKey}')" onmouseenter="handleDayMouseEnter(event, '${dateKey}')" onclick="handleDayClick(event, '${dateKey}')">`;
                 html += `<div class="day-number">${day}</div>`;
@@ -1080,11 +1081,15 @@
                 const singleDayEvents = [];
                 const multiDayEvents = [];
                 
+                // Track which multi-day events have already started on previous rows
+                // so we know when to show labels
+                const multiDayEventsOnThisRow = [];
+                
                 dayEvents.forEach((evt) => {
                     if (isMultiDayEvent(evt)) {
-                        const isStart = isEventStartDate(evt, dateKey, monthStart, monthEnd);
-                        if (isStart) {
-                            multiDayEvents.push(evt);
+                        // Check if this event should start rendering on this row
+                        if (isEventStartOnRow(evt, dateKey, currentRow, firstDay, monthStart, monthEnd, daysInMonth)) {
+                            multiDayEventsOnThisRow.push(evt);
                         }
                     } else {
                         singleDayEvents.push(evt);
@@ -1096,20 +1101,33 @@
                 const eventHeight = 16;
                 
                 // Render multi-day events first (they span across days)
-                multiDayEvents.forEach((evt) => {
+                multiDayEventsOnThisRow.forEach((evt) => {
                     const eventIdx = events.indexOf(evt);
-                    const span = calculateEventSpan(evt, dateKey, monthStart, monthEnd);
+                    const span = calculateEventSpanInRow(evt, dateKey, currentRow, firstDay, daysInMonth, monthStart, monthEnd);
                     
                     // Calculate width: since each day is 1/7th of calendar, to span N days:
                     // Width relative to parent day cell = N * 100%
                     // Account for borders (1px border per day crossed, minus first day)
                     const borderAdjustment = (span - 1) * 1;
                     
+                    // Determine if this is the first row where the event appears
+                    const eventStart = new Date(evt.startDate + 'T00:00:00');
+                    let eventStartInMonth = eventStart;
+                    if (eventStart < monthStart) {
+                        eventStartInMonth = new Date(monthStart);
+                    }
+                    const eventStartDay = eventStartInMonth.getDate();
+                    const eventStartRow = getRowForDay(eventStartDay, firstDay);
+                    const isFirstRow = currentRow === eventStartRow;
+                    
                     let eventStyle = `background: ${evt.color};`;
                     eventStyle += ` width: calc(${span * 100}% + ${borderAdjustment}px);`;
                     eventStyle += ` top: ${eventTop}px;`;
                     
-                    html += `<div class="event multi-day" data-event-idx="${eventIdx}" style="${eventStyle}" onmousedown="handleEventMouseDown(event, ${eventIdx})" onclick="handleEventClick(event, ${eventIdx}, '${dateKey}')">${evt.text}</div>`;
+                    // Show label on first row, or show continuation indicator on subsequent rows
+                    let eventText = isFirstRow ? evt.text : '…';
+                    
+                    html += `<div class="event multi-day" data-event-idx="${eventIdx}" style="${eventStyle}" onmousedown="handleEventMouseDown(event, ${eventIdx})" onclick="handleEventClick(event, ${eventIdx}, '${dateKey}')" title="${evt.text}">${eventText}</div>`;
                     
                     eventTop += eventHeight;
                 });
@@ -1393,6 +1411,86 @@
             const daysFromCurrent = Math.ceil((spanEnd - currentDate) / (1000 * 60 * 60 * 24)) + 1;
             
             return Math.max(1, daysFromCurrent);
+        }
+
+        // Get the row (week) number (0-based) for a given day in a month
+        function getRowForDay(day, firstDayOfMonth) {
+            return Math.floor((day + firstDayOfMonth - 1) / 7);
+        }
+
+        // Get the day of week (0 = Sunday, 6 = Saturday) for a given day
+        function getDayOfWeekForDay(day, firstDayOfMonth) {
+            return (day + firstDayOfMonth - 1) % 7;
+        }
+
+        // Check if a multi-day event should start rendering on this row (at this day)
+        function isEventStartOnRow(evt, dateKey, row, firstDayOfMonth, monthStart, monthEnd, daysInMonth) {
+            const eventStart = new Date(evt.startDate + 'T00:00:00');
+            const eventEnd = new Date(evt.endDate + 'T00:00:00');
+            const currentDate = new Date(dateKey + 'T00:00:00');
+            const currentDay = currentDate.getDate();
+            const currentRow = getRowForDay(currentDay, firstDayOfMonth);
+            
+            if (currentRow !== row) {
+                return false;
+            }
+            
+            // Determine the actual start date for this event in this month
+            let eventStartInMonth = eventStart;
+            if (eventStart < monthStart) {
+                eventStartInMonth = new Date(monthStart);
+            }
+            
+            // Check if event ends before this row - don't render
+            const rowStartDay = Math.max(1, row * 7 - firstDayOfMonth + 1);
+            if (rowStartDay > 1) {
+                const rowStartDate = new Date(monthStart);
+                rowStartDate.setDate(rowStartDay);
+                if (eventEnd < rowStartDate) {
+                    return false;
+                }
+            } else if (eventEnd < monthStart) {
+                return false;
+            }
+            
+            // Determine which row the event starts on
+            const eventStartDay = eventStartInMonth.getDate();
+            const eventStartRow = getRowForDay(eventStartDay, firstDayOfMonth);
+            
+            if (eventStartRow === row) {
+                // Event starts on this row - only render on the actual start day
+                return currentDate.getTime() === eventStartInMonth.getTime();
+            } else if (eventStartRow < row) {
+                // Event started on a previous row - render on first day of this row if event continues
+                const rowFirstDay = Math.max(1, row * 7 - firstDayOfMonth + 1);
+                return currentDay === rowFirstDay;
+            }
+            
+            return false;
+        }
+
+        // Calculate how many days an event spans within a specific row starting from current day
+        function calculateEventSpanInRow(evt, dateKey, row, firstDayOfMonth, daysInMonth, monthStart, monthEnd) {
+            const eventStart = new Date(evt.startDate + 'T00:00:00');
+            const eventEnd = new Date(evt.endDate + 'T00:00:00');
+            const currentDate = new Date(dateKey + 'T00:00:00');
+            const currentDay = currentDate.getDate();
+            
+            // Determine the bounds of this row
+            const rowStartDay = Math.max(1, row * 7 - firstDayOfMonth + 1);
+            const rowEndDay = Math.min(daysInMonth, (row + 1) * 7 - firstDayOfMonth);
+            
+            // Determine where the event ends (within month or event end)
+            let eventEndDay = eventEnd.getDate();
+            if (eventEnd > monthEnd) {
+                eventEndDay = daysInMonth;
+            }
+            
+            // Calculate span: from current day to either end of event or end of row, whichever comes first
+            const spanEndDay = Math.min(eventEndDay, rowEndDay);
+            const span = spanEndDay - currentDay + 1;
+            
+            return Math.max(1, span);
         }
 
         function dateToString(date) {
