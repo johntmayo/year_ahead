@@ -29,6 +29,7 @@ export function showMonthView() {
     const yearView = getById('yearView');
     const monthView = getById('monthView');
     const timelineView = getById('timelineView');
+    const paragraphView = getById('paragraphView');
     const monthSelect = getById('monthSelect');
     const timelineLinesSelect = getById('timelineLinesSelect');
     const yearStringContainer = getById('yearStringContainer');
@@ -36,6 +37,7 @@ export function showMonthView() {
     if (yearView) yearView.style.display = 'none';
     if (monthView) monthView.style.display = 'flex';
     if (timelineView) timelineView.style.display = 'none';
+    if (paragraphView) paragraphView.style.display = 'none';
     if (monthSelect) monthSelect.style.display = 'block';
     if (timelineLinesSelect) timelineLinesSelect.style.display = 'none';
     if (yearStringContainer) yearStringContainer.style.display = 'none';

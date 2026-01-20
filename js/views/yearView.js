@@ -46,12 +46,14 @@ export function showYearView() {
     const yearView = getById('yearView');
     const monthView = getById('monthView');
     const timelineView = getById('timelineView');
+    const paragraphView = getById('paragraphView');
     const monthSelect = getById('monthSelect');
     const timelineLinesSelect = getById('timelineLinesSelect');
 
     if (yearView) yearView.style.display = 'grid';
     if (monthView) monthView.style.display = 'none';
     if (timelineView) timelineView.style.display = 'none';
+    if (paragraphView) paragraphView.style.display = 'none';
     if (monthSelect) monthSelect.style.display = 'none';
     if (timelineLinesSelect) timelineLinesSelect.style.display = 'none';
     

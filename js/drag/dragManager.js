@@ -15,7 +15,9 @@ import { createEventFromDrag, moveEvent } from '../events/eventManager.js';
  */
 export function handleDayMouseDown(e, dateKey) {
     // Only start drag if clicking on empty day area (not on an event)
-    if (!e.target.classList.contains('event') && !e.target.classList.contains('timeline-event')) {
+    if (!e.target.classList.contains('event') && 
+        !e.target.classList.contains('timeline-event') && 
+        !e.target.classList.contains('paragraph-event')) {
         e.preventDefault(); // Prevent text selection
         store.updateDrag({
             mouseDownX: e.clientX,
@@ -87,13 +89,13 @@ export function updateDragCreatePreview() {
     const currentDate = new Date(actualStart);
     while (currentDate <= actualEnd) {
         const dateKey = dateToString(currentDate);
-        const dayEl = document.querySelector(`.day[data-date="${dateKey}"], .timeline-day[data-date="${dateKey}"]`);
+        const dayEl = document.querySelector(`.day[data-date="${dateKey}"], .timeline-day[data-date="${dateKey}"], .paragraph-day[data-date="${dateKey}"]`);
 
         if (dayEl && !dayEl.classList.contains('empty')) {
             addClass(dayEl, 'drag-creating');
 
             // Add preview event
-            const dayEvents = dayEl.querySelector('.day-events, .timeline-day-events');
+            const dayEvents = dayEl.querySelector('.day-events, .timeline-day-events, .paragraph-day-events');
             if (dayEvents && !dayEvents.querySelector('.drag-preview-event')) {
                 const preview = document.createElement('div');
                 preview.className = 'drag-preview-event';
@@ -109,7 +111,7 @@ export function updateDragCreatePreview() {
  * Clear drag create preview
  */
 function clearDragCreatePreview() {
-    qsa('.day.drag-creating, .timeline-day.drag-creating').forEach(day => {
+    qsa('.day.drag-creating, .timeline-day.drag-creating, .paragraph-day.drag-creating').forEach(day => {
         removeClass(day, 'drag-creating');
         const preview = day.querySelector('.drag-preview-event');
         if (preview) preview.remove();
@@ -120,9 +122,9 @@ function clearDragCreatePreview() {
  * Clear all drag visual states
  */
 export function clearDragVisuals() {
-    qsa('.day.drag-over, .timeline-day.drag-over').forEach(el => removeClass(el, 'drag-over'));
+    qsa('.day.drag-over, .timeline-day.drag-over, .paragraph-day.drag-over').forEach(el => removeClass(el, 'drag-over'));
     clearDragCreatePreview();
-    qsa('.event.dragging, .timeline-event.dragging').forEach(el => removeClass(el, 'dragging'));
+    qsa('.event.dragging, .timeline-event.dragging, .paragraph-event.dragging').forEach(el => removeClass(el, 'dragging'));
 }
 
 /**

@@ -20,6 +20,7 @@ import {
 import { renderYear, showYearView } from './yearView.js';
 import { renderMonth, showMonthView } from './monthView.js';
 import { renderTimeline, showTimelineView } from './timelineView.js';
+import { renderParagraph, showParagraphView } from './paragraphView.js';
 import { renderYearString } from '../ui/yearString.js';
 
 /**
@@ -65,6 +66,10 @@ export function setView(view, buttonElement) {
         case VIEWS.TIMELINE:
             showTimelineView();
             break;
+        case VIEWS.PARAGRAPH:
+            showParagraphView();
+            renderParagraph();
+            break;
     }
 }
 
@@ -84,6 +89,9 @@ export function refreshView() {
             break;
         case VIEWS.TIMELINE:
             renderTimeline();
+            break;
+        case VIEWS.PARAGRAPH:
+            renderParagraph();
             break;
     }
 }
@@ -145,7 +153,7 @@ export function updateYearDisplay() {
  */
 export function attachDayEventHandlers(container) {
     // Day handlers
-    qsa('.day:not(.empty), .timeline-day', container).forEach(dayEl => {
+    qsa('.day:not(.empty), .timeline-day, .paragraph-day', container).forEach(dayEl => {
         const dateKey = dayEl.dataset.date;
 
         dayEl.onmousedown = (e) => handleDayMouseDown(e, dateKey);
@@ -154,9 +162,9 @@ export function attachDayEventHandlers(container) {
     });
 
     // Event handlers
-    qsa('.event, .timeline-event', container).forEach(eventEl => {
+    qsa('.event, .timeline-event, .paragraph-event', container).forEach(eventEl => {
         const eventIdx = parseInt(eventEl.dataset.eventIdx);
-        const dayEl = eventEl.closest('.day, .timeline-day');
+        const dayEl = eventEl.closest('.day, .timeline-day, .paragraph-day');
         const dateKey = dayEl?.dataset.date;
 
         eventEl.onmousedown = (e) => handleEventMouseDown(e, eventIdx);

@@ -17,7 +17,8 @@ export const DEFAULT_COLORS = [
 export const VIEWS = {
     YEAR: 'year',
     MONTH: 'month',
-    TIMELINE: 'timeline'
+    TIMELINE: 'timeline',
+    PARAGRAPH: 'paragraph'
 };
 
 export const DRAG_TYPES = {
