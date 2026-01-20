@@ -20,6 +20,7 @@ import {
 import { renderYear, showYearView } from './yearView.js';
 import { renderMonth, showMonthView } from './monthView.js';
 import { renderTimeline, showTimelineView } from './timelineView.js';
+import { renderYearString } from '../ui/yearString.js';
 
 /**
  * Set the current view
@@ -76,6 +77,7 @@ export function refreshView() {
     switch (currentView) {
         case VIEWS.YEAR:
             renderYear();
+            renderYearString();
             break;
         case VIEWS.MONTH:
             renderMonth(store.get('currentMonth'));

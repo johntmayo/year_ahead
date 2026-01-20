@@ -21,6 +21,8 @@ import { initModalListeners } from './ui/modal.js';
 import { renderCategoryKey } from './ui/categoryKey.js';
 import { initNotepad } from './ui/notepad.js';
 import { initInstructions } from './ui/instructions.js';
+import { initTheme } from './themes/themeManager.js';
+import { renderYearString } from './ui/yearString.js';
 
 /**
  * Initialize the application
@@ -46,9 +48,15 @@ function init() {
         // Load saved data
         loadData();
 
+        // Initialize theme system
+        initTheme();
+
         // Render initial view
         console.log('Rendering year view...');
         renderYear();
+        
+        // Render year string
+        renderYearString();
         
         // Check if yearView was populated
         const yearView = getById('yearView');

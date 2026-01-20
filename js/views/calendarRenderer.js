@@ -15,6 +15,7 @@ import {
     stringToDate
 } from '../utils/date.js';
 import { getEventsForDay, getEventIndex } from '../events/eventManager.js';
+import { getEventColorStyle } from '../themes/themeManager.js';
 
 /**
  * Render a calendar month
@@ -110,7 +111,10 @@ function renderDay(dateKey, day, firstDay, monthStart, monthEnd, daysInMonth) {
         const eventStartRow = getRowForDay(eventStartDay, firstDay);
         const isFirstRow = currentRow === eventStartRow;
 
-        let eventStyle = `background: ${escapeAttr(evt.color)};`;
+        // Use theme manager for color styling
+        const colorStyle = getEventColorStyle(evt.color, false);
+        
+        let eventStyle = colorStyle;
         eventStyle += ` width: calc(${span * 100}% + ${borderAdjustment}px);`;
         eventStyle += ` top: ${eventTop}px;`;
 
@@ -125,7 +129,9 @@ function renderDay(dateKey, day, firstDay, monthStart, monthEnd, daysInMonth) {
     // Render single-day events
     singleDayEvents.forEach((evt) => {
         const eventIdx = getEventIndex(evt);
-        let eventStyle = `background: ${escapeAttr(evt.color)};`;
+        const colorStyle = getEventColorStyle(evt.color, false);
+        
+        let eventStyle = colorStyle;
         eventStyle += ` position: absolute;`;
         eventStyle += ` top: ${eventTop}px;`;
         eventStyle += ` left: 0;`;
@@ -151,7 +157,8 @@ export function renderEventsHtml(events, dateKey) {
 
     events.forEach((evt) => {
         const eventIdx = getEventIndex(evt);
-        html += `<div class="event" data-event-idx="${eventIdx}" style="background: ${escapeAttr(evt.color)};">${escapeHtml(evt.text)}</div>`;
+        const colorStyle = getEventColorStyle(evt.color, false);
+        html += `<div class="event" data-event-idx="${eventIdx}" style="${colorStyle}">${escapeHtml(evt.text)}</div>`;
     });
 
     return html;

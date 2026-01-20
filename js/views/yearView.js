@@ -6,6 +6,7 @@ import { store } from '../store.js';
 import { getById, clearChildren, createElement } from '../utils/dom.js';
 import { renderCalendar } from './calendarRenderer.js';
 import { attachDayEventHandlers } from './viewController.js';
+import { renderYearString } from '../ui/yearString.js';
 
 /**
  * Render the year view
@@ -33,6 +34,9 @@ export function renderYear() {
 
     // Attach event handlers after rendering
     attachDayEventHandlers(yearView);
+    
+    // Render year string
+    renderYearString();
 }
 
 /**
@@ -50,4 +54,10 @@ export function showYearView() {
     if (timelineView) timelineView.style.display = 'none';
     if (monthSelect) monthSelect.style.display = 'none';
     if (timelineLinesSelect) timelineLinesSelect.style.display = 'none';
+    
+    // Show/hide year string
+    const yearStringContainer = getById('yearStringContainer');
+    if (yearStringContainer) yearStringContainer.style.display = 'block';
+    
+    renderYearString();
 }

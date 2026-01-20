@@ -15,6 +15,30 @@ import {
 import { getById, createElement, addClass, removeClass, clearChildren } from '../utils/dom.js';
 import { getEventsForDay, getEventIndex } from '../events/eventManager.js';
 import { attachDayEventHandlers, attachEventHandlers } from './viewController.js';
+import { getEventColorStyle } from '../themes/themeManager.js';
+
+/**
+ * Parse inline style string into object
+ * @param {string} styleString - CSS style string
+ * @returns {Object} Style object
+ */
+function parseInlineStyles(styleString) {
+    const styles = {};
+    if (!styleString) return styles;
+    
+    styleString.split(';').forEach(rule => {
+        const trimmed = rule.trim();
+        if (!trimmed) return;
+        const [property, value] = trimmed.split(':').map(s => s.trim());
+        if (property && value) {
+            // Convert kebab-case to camelCase
+            const camelProperty = property.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+            styles[camelProperty] = value;
+        }
+    });
+    
+    return styles;
+}
 
 /**
  * Render the timeline view
@@ -168,11 +192,12 @@ function createTimelineDay(dateKey, lineStart, lineEnd) {
         const span = calculateEventSpan(evt, dateKey, lineStart, lineEnd);
         const width = span * TIMELINE_DAY_WIDTH - 1;
 
+        const colorStyle = getEventColorStyle(evt.color, false);
         const eventDiv = createElement('div', {
             className: 'timeline-event timeline-multi-day',
             dataset: { eventIdx: eventIdx.toString() },
             style: {
-                background: evt.color,
+                ...parseInlineStyles(colorStyle),
                 width: `${width}px`,
                 position: 'absolute',
                 top: `${eventTop}px`,
@@ -189,11 +214,12 @@ function createTimelineDay(dateKey, lineStart, lineEnd) {
     singleDayEvents.forEach((evt) => {
         const eventIdx = getEventIndex(evt);
 
+        const colorStyle = getEventColorStyle(evt.color, false);
         const eventDiv = createElement('div', {
             className: 'timeline-event',
             dataset: { eventIdx: eventIdx.toString() },
             style: {
-                background: evt.color,
+                ...parseInlineStyles(colorStyle),
                 position: 'absolute',
                 top: `${eventTop}px`,
                 left: '0'
@@ -217,12 +243,14 @@ export function showTimelineView() {
     const timelineView = getById('timelineView');
     const monthSelect = getById('monthSelect');
     const timelineLinesSelect = getById('timelineLinesSelect');
+    const yearStringContainer = getById('yearStringContainer');
 
     if (yearView) yearView.style.display = 'none';
     if (monthView) monthView.style.display = 'none';
     if (timelineView) timelineView.style.display = 'block';
     if (monthSelect) monthSelect.style.display = 'none';
     if (timelineLinesSelect) timelineLinesSelect.style.display = 'block';
+    if (yearStringContainer) yearStringContainer.style.display = 'none';
 
     renderTimeline();
 }

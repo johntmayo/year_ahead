@@ -31,12 +31,14 @@ export function showMonthView() {
     const timelineView = getById('timelineView');
     const monthSelect = getById('monthSelect');
     const timelineLinesSelect = getById('timelineLinesSelect');
+    const yearStringContainer = getById('yearStringContainer');
 
     if (yearView) yearView.style.display = 'none';
     if (monthView) monthView.style.display = 'flex';
     if (timelineView) timelineView.style.display = 'none';
     if (monthSelect) monthSelect.style.display = 'block';
     if (timelineLinesSelect) timelineLinesSelect.style.display = 'none';
+    if (yearStringContainer) yearStringContainer.style.display = 'none';
 
     // Render current month
     renderMonth(store.get('currentMonth'));
