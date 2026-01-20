@@ -256,22 +256,6 @@ export function showTimelineView() {
 
     renderTimeline();
 }
-    const yearView = getById('yearView');
-    const monthView = getById('monthView');
-    const timelineView = getById('timelineView');
-    const monthSelect = getById('monthSelect');
-    const timelineLinesSelect = getById('timelineLinesSelect');
-    const yearStringContainer = getById('yearStringContainer');
-
-    if (yearView) yearView.style.display = 'none';
-    if (monthView) monthView.style.display = 'none';
-    if (timelineView) timelineView.style.display = 'block';
-    if (monthSelect) monthSelect.style.display = 'none';
-    if (timelineLinesSelect) timelineLinesSelect.style.display = 'block';
-    if (yearStringContainer) yearStringContainer.style.display = 'none';
-
-    renderTimeline();
-}
 
 /**
  * Change timeline lines setting
