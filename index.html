@@ -454,8 +454,8 @@
 
         .event {
             font-size: 10px;
-            padding: 0;
-            margin-bottom: 0;
+            padding: 2px 4px;
+            margin-bottom: 1px;
             border-radius: 0;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -464,6 +464,27 @@
             color: #333;
             flex-shrink: 0;
             user-select: none;
+        }
+
+        .event.multi-day {
+            position: absolute;
+            z-index: 2;
+            margin: 0;
+            left: -1px;
+            padding: 2px 4px;
+        }
+
+        .day {
+            overflow: visible;
+        }
+
+        .day-events {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: visible;
+            min-height: 16px;
         }
 
         .event.dragging {
@@ -742,6 +763,12 @@
             gap: 1px;
             padding: 1px;
             min-height: 100px;
+            position: relative;
+            overflow: visible;
+        }
+        
+        .timeline-day {
+            overflow: visible;
         }
 
         .timeline-event {
@@ -756,6 +783,11 @@
             flex-shrink: 0;
             user-select: none;
             min-height: 12px;
+        }
+        
+        .timeline-multi-day {
+            margin: 0;
+            left: -1px;
         }
 
         .timeline-event.dragging {
@@ -1031,6 +1063,10 @@
                 html += '<div class="day empty"></div>';
             }
             
+            // Calculate month bounds for span calculations
+            const monthStart = new Date(year, month, 1);
+            const monthEnd = new Date(year, month, daysInMonth);
+            
             // Days
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -1040,9 +1076,56 @@
                 html += `<div class="day-number">${day}</div>`;
                 html += `<div class="day-events">`;
                 
-                dayEvents.forEach((evt, evtIdx) => {
+                // Separate single-day and multi-day events
+                const singleDayEvents = [];
+                const multiDayEvents = [];
+                
+                dayEvents.forEach((evt) => {
+                    if (isMultiDayEvent(evt)) {
+                        const isStart = isEventStartDate(evt, dateKey, monthStart, monthEnd);
+                        if (isStart) {
+                            multiDayEvents.push(evt);
+                        }
+                    } else {
+                        singleDayEvents.push(evt);
+                    }
+                });
+                
+                // Track vertical position for stacking events
+                let eventTop = 0;
+                const eventHeight = 16;
+                
+                // Render multi-day events first (they span across days)
+                multiDayEvents.forEach((evt) => {
                     const eventIdx = events.indexOf(evt);
-                    html += `<div class="event" data-event-idx="${eventIdx}" style="background: ${evt.color};" onmousedown="handleEventMouseDown(event, ${eventIdx})" onclick="handleEventClick(event, ${eventIdx}, '${dateKey}')">${evt.text}</div>`;
+                    const span = calculateEventSpan(evt, dateKey, monthStart, monthEnd);
+                    
+                    // Calculate width: since each day is 1/7th of calendar, to span N days:
+                    // Width relative to parent day cell = N * 100%
+                    // Account for borders (1px border per day crossed, minus first day)
+                    const borderAdjustment = (span - 1) * 1;
+                    
+                    let eventStyle = `background: ${evt.color};`;
+                    eventStyle += ` width: calc(${span * 100}% + ${borderAdjustment}px);`;
+                    eventStyle += ` top: ${eventTop}px;`;
+                    
+                    html += `<div class="event multi-day" data-event-idx="${eventIdx}" style="${eventStyle}" onmousedown="handleEventMouseDown(event, ${eventIdx})" onclick="handleEventClick(event, ${eventIdx}, '${dateKey}')">${evt.text}</div>`;
+                    
+                    eventTop += eventHeight;
+                });
+                
+                // Render single-day events
+                singleDayEvents.forEach((evt) => {
+                    const eventIdx = events.indexOf(evt);
+                    let eventStyle = `background: ${evt.color};`;
+                    eventStyle += ` position: absolute;`;
+                    eventStyle += ` top: ${eventTop}px;`;
+                    eventStyle += ` left: 0;`;
+                    eventStyle += ` right: 0;`;
+                    
+                    html += `<div class="event" data-event-idx="${eventIdx}" style="${eventStyle}" onmousedown="handleEventMouseDown(event, ${eventIdx})" onclick="handleEventClick(event, ${eventIdx}, '${dateKey}')">${evt.text}</div>`;
+                    
+                    eventTop += eventHeight;
                 });
                 
                 html += `</div></div>`;
@@ -1134,6 +1217,10 @@
                     }
                 });
                 
+                // Calculate line bounds for span calculations
+                const lineStart = new Date(lineDays[0] + 'T00:00:00');
+                const lineEnd = new Date(lineDays[lineDays.length - 1] + 'T00:00:00');
+                
                 // Create day cells
                 lineDays.forEach((dateKey, dayIdx) => {
                     const date = new Date(dateKey + 'T00:00:00');
@@ -1158,17 +1245,67 @@
                     const eventsContainer = document.createElement('div');
                     eventsContainer.className = 'timeline-day-events';
                     
-                    // Stack events vertically
-                    dayEvents.forEach((evt, evtIdx) => {
+                    // Separate single-day and multi-day events
+                    const singleDayEvents = [];
+                    const multiDayEvents = [];
+                    
+                    dayEvents.forEach((evt) => {
+                        if (isMultiDayEvent(evt)) {
+                            const isStart = isEventStartDate(evt, dateKey, lineStart, lineEnd);
+                            if (isStart) {
+                                multiDayEvents.push(evt);
+                            }
+                        } else {
+                            singleDayEvents.push(evt);
+                        }
+                    });
+                    
+                    // Track vertical position for stacking events
+                    let eventTop = 0;
+                    const eventHeight = 12;
+                    
+                    // Render multi-day events first (they span horizontally)
+                    multiDayEvents.forEach((evt) => {
+                        const eventIdx = events.indexOf(evt);
+                        const span = calculateEventSpan(evt, dateKey, lineStart, lineEnd);
+                        
+                        // Calculate width: each day is 12px wide in timeline
+                        const dayWidth = 12;
+                        const width = span * dayWidth - 1; // Subtract 1px for border
+                        
+                        const eventDiv = document.createElement('div');
+                        eventDiv.className = 'timeline-event timeline-multi-day';
+                        eventDiv.setAttribute('data-event-idx', eventIdx);
+                        eventDiv.style.background = evt.color;
+                        eventDiv.style.width = `${width}px`;
+                        eventDiv.style.position = 'absolute';
+                        eventDiv.style.top = `${eventTop}px`;
+                        eventDiv.style.left = '0';
+                        eventDiv.style.zIndex = '2';
+                        eventDiv.onmousedown = (e) => handleEventMouseDown(e, eventIdx);
+                        eventDiv.onclick = (e) => handleEventClick(e, eventIdx, dateKey);
+                        eventDiv.textContent = evt.text;
+                        eventsContainer.appendChild(eventDiv);
+                        
+                        eventTop += eventHeight;
+                    });
+                    
+                    // Render single-day events
+                    singleDayEvents.forEach((evt) => {
                         const eventIdx = events.indexOf(evt);
                         const eventDiv = document.createElement('div');
                         eventDiv.className = 'timeline-event';
                         eventDiv.setAttribute('data-event-idx', eventIdx);
                         eventDiv.style.background = evt.color;
+                        eventDiv.style.position = 'absolute';
+                        eventDiv.style.top = `${eventTop}px`;
+                        eventDiv.style.left = '0';
                         eventDiv.onmousedown = (e) => handleEventMouseDown(e, eventIdx);
                         eventDiv.onclick = (e) => handleEventClick(e, eventIdx, dateKey);
                         eventDiv.textContent = evt.text;
                         eventsContainer.appendChild(eventDiv);
+                        
+                        eventTop += eventHeight;
                     });
                     
                     dayDiv.appendChild(eventsContainer);
@@ -1212,6 +1349,50 @@
                 const endDate = new Date(evt.endDate + 'T00:00:00');
                 return date >= startDate && date <= endDate;
             });
+        }
+
+        function isMultiDayEvent(evt) {
+            return evt.startDate !== evt.endDate;
+        }
+
+        function isEventStartDate(evt, dateKey, viewStart, viewEnd) {
+            const eventStart = new Date(evt.startDate + 'T00:00:00');
+            const currentDate = new Date(dateKey + 'T00:00:00');
+            
+            // Check if this is the actual start date of the event
+            if (currentDate.getTime() === eventStart.getTime()) {
+                return true;
+            }
+            
+            // If event started before this view (month/line), check if this is the first day of the view where the event appears
+            if (eventStart < viewStart && currentDate.getTime() === viewStart.getTime()) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        function calculateEventSpan(evt, dateKey, viewStart, viewEnd) {
+            const eventStart = new Date(evt.startDate + 'T00:00:00');
+            const eventEnd = new Date(evt.endDate + 'T00:00:00');
+            const currentDate = new Date(dateKey + 'T00:00:00');
+            
+            // Determine the actual start date for rendering in this view
+            let spanStart = eventStart;
+            if (eventStart < viewStart) {
+                spanStart = new Date(viewStart);
+            }
+            
+            // Calculate span within this view from the start date
+            let spanEnd = eventEnd;
+            if (eventEnd > viewEnd) {
+                spanEnd = new Date(viewEnd);
+            }
+            
+            // Calculate how many days from current date to end of span within view
+            const daysFromCurrent = Math.ceil((spanEnd - currentDate) / (1000 * 60 * 60 * 24)) + 1;
+            
+            return Math.max(1, daysFromCurrent);
         }
 
         function dateToString(date) {
