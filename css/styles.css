@@ -1313,10 +1313,11 @@ select:focus {
 }
 
 .paragraph-day {
-    flex: 0 0 auto;
-    width: 5%;
-    min-width: 40px;
-    aspect-ratio: 1 / 1;
+    flex: 0 0 50px;
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    max-width: 50px;
     background: var(--bg-card);
     border: 0.5px solid var(--border-light);
     cursor: pointer;
@@ -1480,13 +1481,21 @@ select:focus {
 /* Responsive adjustments for paragraph view */
 @media (max-width: 1200px) {
     .paragraph-day {
-        width: calc(100% / 18);
+        flex: 0 0 45px;
+        width: 45px;
+        height: 45px;
+        min-width: 45px;
+        max-width: 45px;
     }
 }
 
 @media (max-width: 900px) {
     .paragraph-day {
-        width: calc(100% / 15);
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        max-width: 40px;
     }
 }
 
@@ -1508,12 +1517,20 @@ select:focus {
     }
     
     .paragraph-day {
-        width: calc(100% / 12);
+        flex: 0 0 35px;
+        width: 35px;
+        height: 35px;
+        min-width: 35px;
+        max-width: 35px;
     }
 }
 
 @media (max-width: 480px) {
     .paragraph-day {
-        width: calc(100% / 10);
+        flex: 0 0 30px;
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        max-width: 30px;
     }
 }
