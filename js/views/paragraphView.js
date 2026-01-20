@@ -32,7 +32,6 @@ export function renderParagraph() {
     clearChildren(paragraphView);
 
     const currentYear = store.get('currentYear');
-    const events = store.get('events');
 
     // Check if it's a leap year
     const isLeapYear = (currentYear % 4 === 0 && currentYear % 100 !== 0) || (currentYear % 400 === 0);
@@ -44,8 +43,6 @@ export function renderParagraph() {
 
     // Create month groups
     const monthGroups = [];
-    let currentMonth = 0;
-    let currentMonthStart = 0;
     let dayIndex = 0;
 
     for (let month = 0; month < 12; month++) {
