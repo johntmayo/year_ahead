@@ -1303,31 +1303,33 @@ select:focus {
     backdrop-filter: var(--blur-soft);
     border: 1px solid var(--border-glass);
     overflow-x: auto;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 0 !important;
     position: relative;
     align-items: flex-start;
     align-content: flex-start;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .paragraph-day {
-    flex: 0 0 50px;
-    width: 50px;
-    height: 50px;
-    min-width: 50px;
-    max-width: 50px;
+    flex: 0 0 50px !important;
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
     background: var(--bg-card);
     border: 0.5px solid var(--border-light);
     cursor: pointer;
     position: relative;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     overflow: hidden;
     transition: all var(--transition-fast);
     user-select: none;
-    margin: 0;
+    margin: 0 !important;
     padding: 0;
     box-sizing: border-box;
 }

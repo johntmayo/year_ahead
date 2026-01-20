@@ -183,7 +183,11 @@ export function showParagraphView() {
     const monthSelect = getById('monthSelect');
     const timelineLinesSelect = getById('timelineLinesSelect');
 
-    if (paragraphView) paragraphView.style.display = 'block';
+    if (paragraphView) {
+        paragraphView.style.display = 'flex';
+        paragraphView.style.flexDirection = 'row';
+        paragraphView.style.flexWrap = 'wrap';
+    }
     if (yearView) yearView.style.display = 'none';
     if (monthView) monthView.style.display = 'none';
     if (timelineView) timelineView.style.display = 'none';
