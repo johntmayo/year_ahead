@@ -82,21 +82,19 @@ export function renderParagraph() {
             dayCell.dataset.monthName = dayData.monthName;
         }
 
-        // Month watermark - add to all days in the month, but only visible on first few
-        const watermark = createElement('div');
-        watermark.className = 'paragraph-month-watermark';
-        watermark.textContent = dayData.monthName.toUpperCase();
-        watermark.dataset.month = dayData.month;
-        // Only show watermark on first 3-4 days of month for visibility
-        if (dayData.day <= 4) {
-            watermark.classList.add('visible');
-        }
-        dayCell.appendChild(watermark);
+        // Month watermark - hidden for now (not legible when repeated)
+        // Keeping the structure but hiding it with CSS
 
-        // Day label (top-left) - just the day letter
+        // Day label (top-left)
         const dayLabel = createElement('div');
         dayLabel.className = 'paragraph-day-label';
-        dayLabel.textContent = dayData.dayName;
+        // Show month abbreviation for first day of month
+        if (dayData.isFirstDayOfMonth) {
+            dayLabel.textContent = `${dayData.monthName.substring(0, 3)} ${dayData.day}`;
+            dayLabel.classList.add('month-label');
+        } else {
+            dayLabel.textContent = `${dayData.day} ${dayData.dayName}`;
+        }
         dayCell.appendChild(dayLabel);
 
         // Events container
