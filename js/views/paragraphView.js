@@ -51,7 +51,9 @@ export function renderParagraph() {
             const date = new Date(currentYear, month, day);
             const dateKey = dateToString(date);
             const dayOfWeek = date.getDay();
-            const dayName = DAY_NAMES[dayOfWeek].charAt(0); // First letter
+            // Map to single letter: M, T, W, H, F, S, U
+            const dayLetterMap = { 0: 'U', 1: 'M', 2: 'T', 3: 'W', 4: 'H', 5: 'F', 6: 'S' };
+            const dayName = dayLetterMap[dayOfWeek];
             const isFirstDayOfMonth = day === 1;
 
             allDays.push({
@@ -61,7 +63,8 @@ export function renderParagraph() {
                 date,
                 month,
                 monthName: MONTH_NAMES[month],
-                isFirstDayOfMonth
+                isFirstDayOfMonth,
+                dayOfWeek
             });
         }
     }
@@ -79,25 +82,21 @@ export function renderParagraph() {
             dayCell.dataset.monthName = dayData.monthName;
         }
 
-        // Month watermark (positioned absolutely behind cells)
-        if (dayData.isFirstDayOfMonth) {
-            const watermark = createElement('div');
-            watermark.className = 'paragraph-month-watermark';
-            watermark.textContent = dayData.monthName.toUpperCase();
-            watermark.dataset.month = dayData.month;
-            dayCell.appendChild(watermark);
+        // Month watermark - add to all days in the month, but only visible on first few
+        const watermark = createElement('div');
+        watermark.className = 'paragraph-month-watermark';
+        watermark.textContent = dayData.monthName.toUpperCase();
+        watermark.dataset.month = dayData.month;
+        // Only show watermark on first 3-4 days of month for visibility
+        if (dayData.day <= 4) {
+            watermark.classList.add('visible');
         }
+        dayCell.appendChild(watermark);
 
-        // Day label (top-left)
+        // Day label (top-left) - just the day letter
         const dayLabel = createElement('div');
         dayLabel.className = 'paragraph-day-label';
-        // Show month abbreviation for first day of month
-        if (dayData.isFirstDayOfMonth) {
-            dayLabel.textContent = `${dayData.monthName.substring(0, 3)} ${dayData.day}`;
-            dayLabel.classList.add('month-label');
-        } else {
-            dayLabel.textContent = `${dayData.day} ${dayData.dayName}`;
-        }
+        dayLabel.textContent = dayData.dayName;
         dayCell.appendChild(dayLabel);
 
         // Events container
