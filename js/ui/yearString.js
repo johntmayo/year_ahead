@@ -69,17 +69,15 @@ export function renderYearString() {
         let color;
         
         if (theme === 'tactile') {
-            // Tactile: use earth tones
-            const r = Math.floor(107 + intensity * 48);
-            const g = Math.floor(68 + intensity * 71);
-            const b = Math.floor(35 + intensity * 104);
+            // Tactile: refined earth tones
+            const r = Math.floor(93 + intensity * 20);
+            const g = Math.floor(64 + intensity * 18);
+            const b = Math.floor(55 + intensity * 16);
             color = `rgb(${r}, ${g}, ${b})`;
         } else {
-            // Glass & Glow: use gradient from primary to secondary
-            const r1 = 102 + intensity * 147; // primary to secondary red
-            const g1 = 126 - intensity * 33;  // primary to secondary green
-            const b1 = 234 - intensity * 135; // primary to secondary blue
-            color = `rgb(${Math.floor(r1)}, ${Math.floor(g1)}, ${Math.floor(b1)})`;
+            // Glass & Glow: sophisticated monochrome with subtle warmth
+            const base = 44 + intensity * 25; // Deep charcoal to medium gray
+            color = `rgb(${Math.floor(base)}, ${Math.floor(base + intensity * 3)}, ${Math.floor(base + intensity * 5)})`;
         }
         
         const opacity = 0.3 + intensity * 0.7;

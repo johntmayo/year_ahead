@@ -114,24 +114,34 @@ export function getEventColorStyle(baseColor, isHover = false) {
             color: ${getContrastColor(baseColor)};
         `.trim();
     } else {
-        // Tactile Impressionism: natural wash with color bleeding
+        // Tactile Impressionism: painterly wash with organic color bleeding
         const rgb = hexToRgb(baseColor);
         if (!rgb) return `background: ${baseColor};`;
         
         const { r, g, b } = rgb;
-        const washR = Math.min(255, Math.floor(r * 0.6 + 50));
-        const washG = Math.min(255, Math.floor(g * 0.6 + 50));
-        const washB = Math.min(255, Math.floor(b * 0.6 + 50));
+        // Create a more sophisticated wash - desaturate and warm slightly
+        const washR = Math.min(255, Math.floor(r * 0.55 + 65));
+        const washG = Math.min(255, Math.floor(g * 0.55 + 60));
+        const washB = Math.min(255, Math.floor(b * 0.55 + 55));
+        
+        // Edge color - slightly darker for definition
+        const edgeR = Math.max(0, Math.floor(r * 0.45 + 40));
+        const edgeG = Math.max(0, Math.floor(g * 0.45 + 35));
+        const edgeB = Math.max(0, Math.floor(b * 0.45 + 30));
         
         return `
-            background: linear-gradient(135deg, 
-                rgba(${washR}, ${washG}, ${washB}, 0.4) 0%, 
-                rgba(${washR}, ${washG}, ${washB}, 0.25) 50%,
-                rgba(${washR}, ${washG}, ${washB}, 0.15) 100%);
-            border: 1px solid rgba(${Math.floor(r * 0.7)}, ${Math.floor(g * 0.7)}, ${Math.floor(b * 0.7)}, 0.5);
+            background: 
+                radial-gradient(ellipse at 30% 50%, rgba(${washR}, ${washG}, ${washB}, 0.45) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(${washR + 10}, ${washG + 8}, ${washB + 5}, 0.35) 0%, transparent 60%),
+                linear-gradient(135deg, 
+                    rgba(${washR}, ${washG}, ${washB}, 0.4) 0%, 
+                    rgba(${washR - 5}, ${washG - 3}, ${washB - 3}, 0.3) 50%,
+                    rgba(${washR - 10}, ${washG - 8}, ${washB - 5}, 0.2) 100%);
+            border: 1px solid rgba(${edgeR}, ${edgeG}, ${edgeB}, 0.4);
             box-shadow: 
-                inset 0 1px 2px rgba(0, 0, 0, 0.1),
-                0 1px 3px rgba(${r}, ${g}, ${b}, 0.2);
+                inset 0 2px 4px rgba(${edgeR}, ${edgeG}, ${edgeB}, 0.15),
+                inset 0 -1px 2px rgba(${washR}, ${washG}, ${washB}, 0.2),
+                0 2px 4px rgba(0, 0, 0, 0.08);
             mix-blend-mode: multiply;
             color: ${getContrastColor(baseColor)};
         `.trim();
