@@ -1504,6 +1504,8 @@ select:focus {
     pointer-events: none;
     z-index: 1;
     overflow: visible;
+    /* Allow multi-day events to extend beyond cell boundaries */
+    clip-path: none;
 }
 
 .paragraph-event {
@@ -1533,6 +1535,13 @@ select:focus {
     isolation: isolate;
 }
 
+/* Multi-day events span across multiple cells */
+.paragraph-event-multi-day {
+    /* Width is set dynamically in JS based on span */
+    /* Positioned absolutely to flow across day cells */
+    overflow: visible;
+}
+
 .paragraph-event:hover {
     transform: scale(1.02);
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
@@ -1541,6 +1550,25 @@ select:focus {
 
 .paragraph-event.dragging {
     opacity: 0.5;
+}
+
+/* Multi-day events span across multiple cells */
+.paragraph-event-multi-day {
+    /* Width is set dynamically in JS based on span */
+    /* Positioned absolutely to flow across day cells */
+    overflow: visible;
+    /* Ensure event can extend beyond its container */
+    will-change: transform;
+}
+
+/* Round right corners on single-day events or when event ends */
+.paragraph-event-multi-day[data-event-span="1"] {
+    border-radius: 2px;
+}
+
+/* When gridlines are hidden, ensure multi-day events touch perfectly */
+.paragraph-view.gridlines-hidden .paragraph-event-multi-day {
+    /* Events should extend to cover the full span without gaps */
 }
 
 .paragraph-day.drag-creating .drag-preview-event {

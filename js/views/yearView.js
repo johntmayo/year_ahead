@@ -35,7 +35,7 @@ export function renderYear() {
     // Attach event handlers after rendering
     attachDayEventHandlers(yearView);
     
-    // Render year string
+    // Render year stringS
     renderYearString();
 }
 

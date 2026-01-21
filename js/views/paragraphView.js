@@ -108,6 +108,21 @@ export function renderParagraph() {
         eventSlotMap.set(eventIdx, slot);
     });
 
+    // Separate single-day and multi-day events
+    // Multi-day events will be rendered only on their start day
+    const multiDayEvents = events.filter(evt => evt.startDate !== evt.endDate);
+    const singleDayEvents = events.filter(evt => evt.startDate === evt.endDate);
+
+    // Build a map of which events start on which day
+    const eventsByStartDate = new Map();
+    multiDayEvents.forEach(evt => {
+        const startDate = evt.startDate;
+        if (!eventsByStartDate.has(startDate)) {
+            eventsByStartDate.set(startDate, []);
+        }
+        eventsByStartDate.get(startDate).push(evt);
+    });
+
     // Render all days as direct children of paragraphView
     allDays.forEach((dayData, index) => {
         const dayCell = createElement('div');
@@ -120,9 +135,6 @@ export function renderParagraph() {
             dayCell.dataset.month = dayData.month;
             dayCell.dataset.monthName = dayData.monthName;
         }
-
-        // Month watermark - hidden for now (not legible when repeated)
-        // Keeping the structure but hiding it with CSS
 
         // Day label (top-left)
         const dayLabel = createElement('div');
@@ -140,101 +152,104 @@ export function renderParagraph() {
         const eventsContainer = createElement('div');
         eventsContainer.className = 'paragraph-day-events';
 
-        // Get events for this day
-        const dayEvents = getEventsForDay(dayData.dateKey);
-        const eventCount = dayEvents.length;
+        // Get single-day events for this day
+        const daySingleDayEvents = getEventsForDay(dayData.dateKey).filter(
+            evt => evt.startDate === evt.endDate
+        );
+
+        // Get multi-day events that START on this day
+        const dayMultiDayEvents = eventsByStartDate.get(dayData.dateKey) || [];
+
+        // Combine all events that appear on this day (for stacking calculation)
+        const allDayEvents = [...daySingleDayEvents, ...dayMultiDayEvents];
+        const eventCount = allDayEvents.length;
 
         // Sort events by their slot assignment to ensure consistent ordering
-        const sortedDayEvents = [...dayEvents].sort((a, b) => {
+        const sortedDayEvents = [...allDayEvents].sort((a, b) => {
             const slotA = eventSlotMap.get(getEventIndex(a));
             const slotB = eventSlotMap.get(getEventIndex(b));
             return slotA - slotB;
         });
 
-        // Render events as stacked vertical slices
-        sortedDayEvents.forEach((evt, localIndex) => {
+        // Track vertical position for stacking
+        let eventTop = 0;
+        const eventHeight = eventCount > 0 ? (100 / eventCount) : 100;
+
+        // Render multi-day events first (only on their start day)
+        dayMultiDayEvents.forEach((evt) => {
             const eventIdx = getEventIndex(evt);
-            const isMultiDayEvent = evt.startDate !== evt.endDate;
-            const colorStyle = getEventColorStyle(evt.color, false, isMultiDayEvent);
+            const isMultiDay = true;
+            const colorStyle = getEventColorStyle(evt.color, false, isMultiDay);
 
-            // Check if this is the start/end of a multi-day event
-            const isEventStart = evt.startDate === dayData.dateKey;
-            const isEventEnd = evt.endDate === dayData.dateKey;
-            const isMultiDay = evt.startDate !== evt.endDate;
+            // Calculate the span (number of days) for this event
+            const startDate = stringToDate(evt.startDate);
+            const endDate = stringToDate(evt.endDate);
+            const spanDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
 
-            // Get the slot for this event (global slot assignment)
-            const globalSlot = eventSlotMap.get(eventIdx);
-            
-            // Calculate height based on number of events present on THIS day
-            const eventHeight = eventCount > 0 ? (100 / eventCount) : 100;
-            
-            // Calculate position: find where this event's slot falls among the events present today
-            // We need to map the global slot to a local position
+            // Find the slot position for this event
             const localSlot = sortedDayEvents.findIndex(e => getEventIndex(e) === eventIdx);
-            const eventTop = localSlot * eventHeight;
+            const currentEventTop = localSlot * eventHeight;
+
+            const eventEl = createElement('div');
+            eventEl.className = 'paragraph-event paragraph-event-multi-day';
+            eventEl.dataset.eventIdx = eventIdx;
+            eventEl.dataset.eventSpan = spanDays;
+            eventEl.title = escapeAttr(evt.text);
+
+            // Check if gridlines are hidden
+            const gridlinesHidden = paragraphView && paragraphView.classList.contains('gridlines-hidden');
+            
+            // Calculate width: span across multiple day cells
+            // Day cells are 50px wide (responsive, but we'll use calc for flexibility)
+            // We need to account for borders/gaps between cells
+            // Use calc() to handle responsive day widths
+            const dayWidth = 50; // Base width in pixels
+            const borderWidth = gridlinesHidden ? 0 : 0.5; // Border width when visible
+            // Calculate total width: (spanDays * dayWidth) minus borders between cells
+            const totalWidth = (spanDays * dayWidth) - ((spanDays - 1) * borderWidth);
+            
+            // Apply styling
+            let style = colorStyle;
+            style += ` height: ${eventHeight}%;`;
+            style += ` top: ${currentEventTop}%;`;
+            style += ` width: ${totalWidth}px;`;
+            style += ` left: 0;`;
+            style += ` min-width: ${dayWidth}px;`; // Ensure at least one day width
+            
+            // Round corners only on the start (left side)
+            // The right side will be rounded when the event ends (handled by CSS or we could add data attribute)
+            style += ` border-radius: 2px 0 0 2px;`;
+
+            eventEl.style.cssText = style;
+            // Show full event text on start day
+            eventEl.textContent = evt.text;
+
+            eventsContainer.appendChild(eventEl);
+            eventTop += eventHeight;
+        });
+
+        // Render single-day events
+        daySingleDayEvents.forEach((evt) => {
+            const eventIdx = getEventIndex(evt);
+            const colorStyle = getEventColorStyle(evt.color, false, false);
+
+            // Find the slot position for this event
+            const localSlot = sortedDayEvents.findIndex(e => getEventIndex(e) === eventIdx);
+            const currentEventTop = localSlot * eventHeight;
 
             const eventEl = createElement('div');
             eventEl.className = 'paragraph-event';
             eventEl.dataset.eventIdx = eventIdx;
             eventEl.title = escapeAttr(evt.text);
 
-            // Check if event continues to next/previous day for continuous styling
-            const nextDay = new Date(dayData.date);
-            nextDay.setDate(nextDay.getDate() + 1);
-            const nextDateKey = dateToString(nextDay);
-            const continuesNext = isDateInRange(nextDateKey, evt.startDate, evt.endDate);
-
-            const prevDay = new Date(dayData.date);
-            prevDay.setDate(prevDay.getDate() - 1);
-            const prevDateKey = dateToString(prevDay);
-            const continuesFromPrev = isDateInRange(prevDateKey, evt.startDate, evt.endDate);
-
-            // Check if gridlines are hidden
-            const paragraphView = getById('paragraphView');
-            const gridlinesHidden = paragraphView && paragraphView.classList.contains('gridlines-hidden');
-            
             // Apply styling
             let style = colorStyle;
             style += ` height: ${eventHeight}%;`;
-            style += ` top: ${eventTop}%;`;
-            
-            // For multi-day events, make them continuous across cells
-            if (isMultiDay) {
-                // When gridlines are hidden: events should touch exactly with no overlap
-                // When gridlines are visible: extend slightly to cover the border
-                // Use 0px extension when hidden to prevent transparency overlap artifacts
-                if (gridlinesHidden) {
-                    // No extension - events touch exactly at cell boundaries
-                    if (continuesFromPrev && continuesNext) {
-                        style += ' left: 0; right: 0; border-radius: 0;';
-                    } else if (continuesFromPrev) {
-                        style += ' left: 0; right: 0; border-radius: 0 2px 2px 0;';
-                    } else if (continuesNext) {
-                        style += ' left: 0; right: 0; border-radius: 2px 0 0 2px;';
-                    } else {
-                        style += ' left: 0; right: 0; border-radius: 2px;';
-                    }
-                } else {
-                    // Gridlines visible - extend slightly to cover border
-                    if (continuesFromPrev && continuesNext) {
-                        style += ' left: -0.5px; right: -0.5px; border-radius: 0;';
-                    } else if (continuesFromPrev) {
-                        style += ' left: -0.5px; right: 0; border-radius: 0 2px 2px 0;';
-                    } else if (continuesNext) {
-                        style += ' left: 0; right: -0.5px; border-radius: 2px 0 0 2px;';
-                    } else {
-                        style += ' left: 0; right: 0; border-radius: 2px;';
-                    }
-                }
-            } else {
-                // Single day event - small border radius, contained within cell
-                style += ' left: 0; right: 0; border-radius: 2px;';
-            }
+            style += ` top: ${currentEventTop}%;`;
+            style += ` left: 0; right: 0; border-radius: 2px;`;
 
             eventEl.style.cssText = style;
-            // Only show text on the start day of multi-day events, or always for single-day events
-            // textContent automatically escapes HTML safely, so we don't need escapeHtml here
-            eventEl.textContent = isEventStart ? evt.text : '';
+            eventEl.textContent = evt.text;
 
             eventsContainer.appendChild(eventEl);
         });
