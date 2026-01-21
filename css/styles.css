@@ -1409,10 +1409,8 @@ select:focus {
 
 .paragraph-event {
     position: absolute;
-    top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
     font-size: clamp(7px, 1vw, 9px);
     padding: 2px 4px;
     overflow: hidden;
@@ -1430,6 +1428,7 @@ select:focus {
     z-index: 2;
     /* Ensure events touch perfectly - no gaps */
     margin: 0;
+    box-sizing: border-box;
 }
 
 .paragraph-event:hover {

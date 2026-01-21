@@ -69,6 +69,27 @@ export function renderParagraph() {
         }
     }
 
+    // First pass: Build event slot assignment map
+    // We need to assign each event a consistent vertical slot across all days
+    // Slots are assigned based on when events first appear (start date)
+    const events = store.get('events');
+    const eventSlotMap = new Map(); // Maps event index to slot number
+    const eventStartDates = new Map(); // Maps event index to start date for sorting
+    
+    // Collect all events and their start dates
+    events.forEach((evt) => {
+        const eventIdx = getEventIndex(evt);
+        eventStartDates.set(eventIdx, evt.startDate);
+    });
+    
+    // Sort events by start date, then assign slots (earliest events get lower slots)
+    const sortedEvents = Array.from(eventStartDates.entries())
+        .sort((a, b) => a[1].localeCompare(b[1]));
+    
+    sortedEvents.forEach(([eventIdx, startDate], slot) => {
+        eventSlotMap.set(eventIdx, slot);
+    });
+
     // Render all days as direct children of paragraphView
     allDays.forEach((dayData, index) => {
         const dayCell = createElement('div');
@@ -103,9 +124,17 @@ export function renderParagraph() {
 
         // Get events for this day
         const dayEvents = getEventsForDay(dayData.dateKey);
+        const eventCount = dayEvents.length;
 
-        // Render events as highlighter sweeps
-        dayEvents.forEach((evt) => {
+        // Sort events by their slot assignment to ensure consistent ordering
+        const sortedDayEvents = [...dayEvents].sort((a, b) => {
+            const slotA = eventSlotMap.get(getEventIndex(a));
+            const slotB = eventSlotMap.get(getEventIndex(b));
+            return slotA - slotB;
+        });
+
+        // Render events as stacked vertical slices
+        sortedDayEvents.forEach((evt, localIndex) => {
             const eventIdx = getEventIndex(evt);
             const colorStyle = getEventColorStyle(evt.color, false);
 
@@ -114,6 +143,17 @@ export function renderParagraph() {
             const isEventEnd = evt.endDate === dayData.dateKey;
             const isMultiDay = evt.startDate !== evt.endDate;
 
+            // Get the slot for this event (global slot assignment)
+            const globalSlot = eventSlotMap.get(eventIdx);
+            
+            // Calculate height based on number of events present on THIS day
+            const eventHeight = eventCount > 0 ? (100 / eventCount) : 100;
+            
+            // Calculate position: find where this event's slot falls among the events present today
+            // We need to map the global slot to a local position
+            const localSlot = sortedDayEvents.findIndex(e => getEventIndex(e) === eventIdx);
+            const eventTop = localSlot * eventHeight;
+
             const eventEl = createElement('div');
             eventEl.className = 'paragraph-event';
             eventEl.dataset.eventIdx = eventIdx;
@@ -121,6 +161,8 @@ export function renderParagraph() {
 
             // Apply styling
             let style = colorStyle;
+            style += ` height: ${eventHeight}%;`;
+            style += ` top: ${eventTop}%;`;
             
             // For multi-day events, handle flow across line breaks
             if (isMultiDay) {
