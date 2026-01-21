@@ -111,17 +111,49 @@ function renderDay(dateKey, day, firstDay, monthStart, monthEnd, daysInMonth) {
         const eventStartRow = getRowForDay(eventStartDay, firstDay);
         const isFirstRow = currentRow === eventStartRow;
 
-        // Use theme manager for color styling
-        const colorStyle = getEventColorStyle(evt.color, false);
+        // Check if this is the start/end of the event in this row
+        const eventStartDate = stringToDate(evt.startDate);
+        const eventEndDate = stringToDate(evt.endDate);
+        const currentDate = stringToDate(dateKey);
+        const isEventStart = currentDate.getTime() === eventStartDate.getTime();
+        const isEventEnd = currentDate.getTime() === eventEndDate.getTime();
+        
+        // Check if event continues to next day (within this row or next row)
+        const nextDay = new Date(currentDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+        const nextDayInRow = getRowForDay(nextDay.getDate(), firstDay);
+        const continuesNext = nextDay <= eventEndDate && nextDayInRow === currentRow;
+        
+        // Check if event continues from previous day (within this row)
+        const prevDay = new Date(currentDate);
+        prevDay.setDate(prevDay.getDate() - 1);
+        const prevDayInRow = prevDay >= monthStart ? getRowForDay(prevDay.getDate(), firstDay) : -1;
+        const continuesFromPrev = prevDay >= eventStartDate && prevDayInRow === currentRow;
+
+        // Use theme manager for color styling - pass isMultiDay flag for painterly style
+        const colorStyle = getEventColorStyle(evt.color, false, true);
         
         let eventStyle = colorStyle;
         eventStyle += ` width: calc(${span * 100}% + ${borderAdjustment}px);`;
         eventStyle += ` top: ${eventTop}px;`;
+        // Extend beyond cell boundaries for seamless connection
+        eventStyle += ` left: -1px;`;
+        // Remove right border for continuous flow
+        eventStyle += ` border-right: none;`;
+        
+        // Add data attributes for styling start/end
+        let dataAttrs = `data-event-idx="${eventIdx}"`;
+        if (isEventStart || (!continuesFromPrev && isFirstRow)) {
+            dataAttrs += ` data-event-start="true"`;
+        }
+        if (isEventEnd || (!continuesNext && span === 1)) {
+            dataAttrs += ` data-event-end="true"`;
+        }
 
         // Show label on first row, or show continuation indicator
         const eventText = isFirstRow ? escapeHtml(evt.text) : '…';
 
-        html += `<div class="event multi-day" data-event-idx="${eventIdx}" style="${eventStyle}" title="${escapeAttr(evt.text)}">${eventText}</div>`;
+        html += `<div class="event multi-day" ${dataAttrs} style="${eventStyle}" title="${escapeAttr(evt.text)}">${eventText}</div>`;
 
         eventTop += eventHeight;
     });

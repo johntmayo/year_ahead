@@ -136,7 +136,8 @@ export function renderParagraph() {
         // Render events as stacked vertical slices
         sortedDayEvents.forEach((evt, localIndex) => {
             const eventIdx = getEventIndex(evt);
-            const colorStyle = getEventColorStyle(evt.color, false);
+            const isMultiDayEvent = evt.startDate !== evt.endDate;
+            const colorStyle = getEventColorStyle(evt.color, false, isMultiDayEvent);
 
             // Check if this is the start/end of a multi-day event
             const isEventStart = evt.startDate === dayData.dateKey;

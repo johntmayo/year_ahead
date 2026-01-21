@@ -113,7 +113,7 @@ function setupThemeToggle() {
  * @param {boolean} isHover - Whether this is for hover state
  * @returns {string} CSS style string
  */
-export function getEventColorStyle(baseColor, isHover = false) {
+export function getEventColorStyle(baseColor, isHover = false, isMultiDay = false) {
     // Glass & Glow: soft gradient with glow effect
     // Reduced transparency by 30% (increased opacity)
     const rgb = hexToRgb(baseColor);
@@ -129,15 +129,31 @@ export function getEventColorStyle(baseColor, isHover = false) {
     const borderColor = mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.6)';
     const shadowColor = mode === 'dark' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)';
     
-    return `
-        background: linear-gradient(135deg, 
-            rgba(${r}, ${g}, ${b}, ${alpha * 2}) 0%, 
-            rgba(${r}, ${g}, ${b}, ${alpha}) 100%);
-        border: 1px solid ${borderColor};
-        box-shadow: 0 0 8px rgba(${r}, ${g}, ${b}, ${isHover ? 0.4 : 0.2}),
-                    0 2px 4px ${shadowColor};
-        color: ${getContrastColor(baseColor)};
-    `.trim();
+    // For multi-day events, use a painterly uniform wash
+    // Completely uniform color (no gradient) so it flows seamlessly across cells
+    if (isMultiDay) {
+        // Uniform color wash - no gradient to avoid repeating pattern
+        // Subtle inner glow for depth, but uniform base color
+        const washAlpha = alpha * 1.15; // Slightly more opaque for better visibility
+        return `
+            background: rgba(${r}, ${g}, ${b}, ${washAlpha});
+            border: none;
+            box-shadow: inset 0 0 20px rgba(${r}, ${g}, ${b}, ${washAlpha * 0.25}),
+                        0 0 8px rgba(${r}, ${g}, ${b}, ${isHover ? 0.18 : 0.1});
+            color: ${getContrastColor(baseColor)};
+        `.trim();
+    } else {
+        // Single-day events keep the diagonal gradient for visual interest
+        return `
+            background: linear-gradient(135deg, 
+                rgba(${r}, ${g}, ${b}, ${alpha * 2}) 0%, 
+                rgba(${r}, ${g}, ${b}, ${alpha}) 100%);
+            border: 1px solid ${borderColor};
+            box-shadow: 0 0 8px rgba(${r}, ${g}, ${b}, ${isHover ? 0.4 : 0.2}),
+                        0 2px 4px ${shadowColor};
+            color: ${getContrastColor(baseColor)};
+        `.trim();
+    }
 }
 
 /**

@@ -763,6 +763,11 @@ button:active {
     overflow: visible;
 }
 
+/* Remove right border to allow events to flow seamlessly */
+.day:not(:last-child) {
+    border-right: none;
+}
+
 [data-theme="glass-glow"] .day:hover {
     background: rgba(255, 255, 255, 0.95);
     transform: scale(1.02);
@@ -786,6 +791,7 @@ button:active {
     position: relative;
     overflow: visible;
     min-height: 16px;
+    z-index: 1;
 }
 
 .day.empty {
@@ -850,6 +856,24 @@ button:active {
     margin: 0;
     left: -1px;
     padding: 2px 4px;
+    /* Extend right edge to connect with next cell */
+    margin-right: -1px;
+    /* Default: no border radius for seamless flow */
+    border-radius: 0;
+}
+
+/* Round corners only on start/end of multi-day events */
+.event.multi-day[data-event-start="true"] {
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.event.multi-day[data-event-end="true"] {
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* If it's both start and end (single day in this row), fully round */
+.event.multi-day[data-event-start="true"][data-event-end="true"] {
+    border-radius: var(--radius-sm);
 }
 
 .event.dragging {
