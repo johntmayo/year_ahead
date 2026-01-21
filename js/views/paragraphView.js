@@ -207,16 +207,37 @@ export function renderParagraph() {
             let style = colorStyle;
             style += ` height: ${eventHeight}%;`;
             style += ` top: ${currentEventTop}%;`;
-            style += ` left: 0; right: 0;`; // Fill the day cell
             
-            // Add border-radius based on position in the event
+            // When gridlines are visible, extend events slightly to cover borders
+            // When gridlines are hidden, events should touch exactly
+            if (!gridlinesHidden) {
+                // Extend to cover borders between cells
+                if (isEventStart && !isEventEnd) {
+                    // Start of event - extend right to cover border
+                    style += ` left: 0; right: -0.5px;`;
+                } else if (!isEventStart && isEventEnd) {
+                    // End of event - extend left to cover border
+                    style += ` left: -0.5px; right: 0;`;
+                } else if (!isEventStart && !isEventEnd) {
+                    // Middle of event - extend both sides to cover borders
+                    style += ` left: -0.5px; right: -0.5px;`;
+                } else {
+                    // Single day or both start and end
+                    style += ` left: 0; right: 0;`;
+                }
+            } else {
+                // Gridlines hidden - events touch exactly
+                style += ` left: 0; right: 0;`;
+            }
+            
+            // Add border-radius based on position in the event (more rounded for visibility)
             if (isEventStart && isEventEnd) {
                 // Single day (shouldn't happen for multi-day, but handle it)
-                style += ` border-radius: 2px;`;
+                style += ` border-radius: 8px;`;
             } else if (isEventStart) {
-                style += ` border-radius: 2px 0 0 2px;`; // Round left corners
+                style += ` border-radius: 8px 0 0 8px;`; // Round left corners
             } else if (isEventEnd) {
-                style += ` border-radius: 0 2px 2px 0;`; // Round right corners
+                style += ` border-radius: 0 8px 8px 0;`; // Round right corners
             } else {
                 style += ` border-radius: 0;`; // No rounding in middle
             }

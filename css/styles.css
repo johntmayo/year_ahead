@@ -1437,6 +1437,8 @@ select:focus {
     border-right: none;
 }
 
+/* When gridlines are visible, events extend to cover borders (handled in JS) */
+
 /* Month start indicator - thicker left border */
 .paragraph-day.month-start {
     border-left: 2px solid var(--color-primary);
@@ -1527,12 +1529,14 @@ select:focus {
     align-items: center;
     transition: all var(--transition-fast);
     z-index: 2;
-    /* Ensure events touch perfectly - no gaps, no borders */
+    /* Ensure events touch perfectly - no gaps, no borders, no overlap */
     margin: 0;
     border: none;
     box-sizing: border-box;
     /* Prevent visual artifacts from overlapping transparency */
     isolation: isolate;
+    /* Ensure events don't create visible lines between cells */
+    will-change: auto;
 }
 
 /* Multi-day events span across multiple cells */
@@ -1540,6 +1544,11 @@ select:focus {
     /* Each piece fills its day cell */
     /* Pieces are styled to look continuous */
     overflow: visible;
+    /* Remove any potential overlap artifacts */
+    margin: 0;
+    /* Ensure seamless connection between cells */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 /* Text overlay for multi-day events - spans full event width */

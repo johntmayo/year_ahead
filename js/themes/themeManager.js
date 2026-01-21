@@ -133,13 +133,12 @@ export function getEventColorStyle(baseColor, isHover = false, isMultiDay = fals
     // Completely uniform color (no gradient) so it flows seamlessly across cells
     if (isMultiDay) {
         // Uniform color wash - no gradient to avoid repeating pattern
-        // Subtle inner glow for depth, but uniform base color
+        // Remove inset shadow to prevent visible edges between cells
         const washAlpha = alpha * 1.15; // Slightly more opaque for better visibility
         return `
             background: rgba(${r}, ${g}, ${b}, ${washAlpha});
             border: none;
-            box-shadow: inset 0 0 20px rgba(${r}, ${g}, ${b}, ${washAlpha * 0.25}),
-                        0 0 8px rgba(${r}, ${g}, ${b}, ${isHover ? 0.18 : 0.1});
+            box-shadow: 0 0 8px rgba(${r}, ${g}, ${b}, ${isHover ? 0.18 : 0.1});
             color: ${getContrastColor(baseColor)};
         `.trim();
     } else {
