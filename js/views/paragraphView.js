@@ -152,16 +152,20 @@ export function renderParagraph() {
         const eventsContainer = createElement('div');
         eventsContainer.className = 'paragraph-day-events';
 
-        // Get single-day events for this day
-        const daySingleDayEvents = getEventsForDay(dayData.dateKey).filter(
+        // Get ALL events for this day (including multi-day events that continue here)
+        const allEventsForDay = getEventsForDay(dayData.dateKey);
+        
+        // Separate into single-day and multi-day events
+        const daySingleDayEvents = allEventsForDay.filter(
             evt => evt.startDate === evt.endDate
         );
 
-        // Get multi-day events that START on this day
+        // Get multi-day events that START on this day (for rendering)
         const dayMultiDayEvents = eventsByStartDate.get(dayData.dateKey) || [];
-
-        // Combine all events that appear on this day (for stacking calculation)
-        const allDayEvents = [...daySingleDayEvents, ...dayMultiDayEvents];
+        
+        // For stacking calculation, we need ALL events that appear on this day
+        // This includes multi-day events that continue here (not just start here)
+        const allDayEvents = allEventsForDay; // Use all events for proper stacking
         const eventCount = allDayEvents.length;
 
         // Sort events by their slot assignment to ensure consistent ordering
