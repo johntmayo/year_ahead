@@ -109,11 +109,10 @@ export function renderParagraph() {
     });
 
     // Separate single-day and multi-day events
-    // Multi-day events will be rendered only on their start day
     const multiDayEvents = events.filter(evt => evt.startDate !== evt.endDate);
     const singleDayEvents = events.filter(evt => evt.startDate === evt.endDate);
 
-    // Build a map of which events start on which day
+    // Build a map of which events start on which day (for text overlay)
     const eventsByStartDate = new Map();
     multiDayEvents.forEach(evt => {
         const startDate = evt.startDate;
@@ -122,6 +121,12 @@ export function renderParagraph() {
         }
         eventsByStartDate.get(startDate).push(evt);
     });
+    
+    // Check if gridlines are hidden (used for width calculations)
+    const paragraphView = getById('paragraphView');
+    const gridlinesHidden = paragraphView && paragraphView.classList.contains('gridlines-hidden');
+    const dayWidth = 50; // Base width in pixels
+    const borderWidth = gridlinesHidden ? 0 : 0.5; // Border width when visible
 
     // Render all days as direct children of paragraphView
     allDays.forEach((dayData, index) => {
@@ -159,13 +164,13 @@ export function renderParagraph() {
         const daySingleDayEvents = allEventsForDay.filter(
             evt => evt.startDate === evt.endDate
         );
-
-        // Get multi-day events that START on this day (for rendering)
-        const dayMultiDayEvents = eventsByStartDate.get(dayData.dateKey) || [];
+        
+        const dayMultiDayEvents = allEventsForDay.filter(
+            evt => evt.startDate !== evt.endDate
+        );
         
         // For stacking calculation, we need ALL events that appear on this day
-        // This includes multi-day events that continue here (not just start here)
-        const allDayEvents = allEventsForDay; // Use all events for proper stacking
+        const allDayEvents = allEventsForDay;
         const eventCount = allDayEvents.length;
 
         // Sort events by their slot assignment to ensure consistent ordering
@@ -176,19 +181,17 @@ export function renderParagraph() {
         });
 
         // Track vertical position for stacking
-        let eventTop = 0;
         const eventHeight = eventCount > 0 ? (100 / eventCount) : 100;
 
-        // Render multi-day events first (only on their start day)
+        // Render multi-day events on EACH day they appear (for proper stacking)
         dayMultiDayEvents.forEach((evt) => {
             const eventIdx = getEventIndex(evt);
             const isMultiDay = true;
             const colorStyle = getEventColorStyle(evt.color, false, isMultiDay);
 
-            // Calculate the span (number of days) for this event
-            const startDate = stringToDate(evt.startDate);
-            const endDate = stringToDate(evt.endDate);
-            const spanDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            // Check if this is the start/end of the event
+            const isEventStart = evt.startDate === dayData.dateKey;
+            const isEventEnd = evt.endDate === dayData.dateKey;
 
             // Find the slot position for this event
             const localSlot = sortedDayEvents.findIndex(e => getEventIndex(e) === eventIdx);
@@ -197,39 +200,79 @@ export function renderParagraph() {
             const eventEl = createElement('div');
             eventEl.className = 'paragraph-event paragraph-event-multi-day';
             eventEl.dataset.eventIdx = eventIdx;
-            eventEl.dataset.eventSpan = spanDays;
             eventEl.title = escapeAttr(evt.text);
-
-            // Check if gridlines are hidden
-            const gridlinesHidden = paragraphView && paragraphView.classList.contains('gridlines-hidden');
             
-            // Calculate width: span across multiple day cells
-            // Day cells are 50px wide (responsive, but we'll use calc for flexibility)
-            // We need to account for borders/gaps between cells
-            // Use calc() to handle responsive day widths
-            const dayWidth = 50; // Base width in pixels
-            const borderWidth = gridlinesHidden ? 0 : 0.5; // Border width when visible
-            // Calculate total width: (spanDays * dayWidth) minus borders between cells
-            const totalWidth = (spanDays * dayWidth) - ((spanDays - 1) * borderWidth);
+            // Don't add text content here - we'll add it as a separate overlay on start day
             
-            // Apply styling
+            // Apply styling - each piece fills its day cell
             let style = colorStyle;
             style += ` height: ${eventHeight}%;`;
             style += ` top: ${currentEventTop}%;`;
-            style += ` width: ${totalWidth}px;`;
-            style += ` left: 0;`;
-            style += ` min-width: ${dayWidth}px;`; // Ensure at least one day width
+            style += ` left: 0; right: 0;`; // Fill the day cell
             
-            // Round corners only on the start (left side)
-            // The right side will be rounded when the event ends (handled by CSS or we could add data attribute)
-            style += ` border-radius: 2px 0 0 2px;`;
+            // Add border-radius based on position in the event
+            if (isEventStart && isEventEnd) {
+                // Single day (shouldn't happen for multi-day, but handle it)
+                style += ` border-radius: 2px;`;
+            } else if (isEventStart) {
+                style += ` border-radius: 2px 0 0 2px;`; // Round left corners
+            } else if (isEventEnd) {
+                style += ` border-radius: 0 2px 2px 0;`; // Round right corners
+            } else {
+                style += ` border-radius: 0;`; // No rounding in middle
+            }
 
             eventEl.style.cssText = style;
-            // Show full event text on start day
-            eventEl.textContent = evt.text;
-
             eventsContainer.appendChild(eventEl);
-            eventTop += eventHeight;
+        });
+        
+        // Add text overlay on start day only (spans full event width)
+        const dayMultiDayEventsStarting = eventsByStartDate.get(dayData.dateKey) || [];
+        dayMultiDayEventsStarting.forEach((evt) => {
+            const eventIdx = getEventIndex(evt);
+            
+            // Calculate the span (number of days) for this event
+            const startDate = stringToDate(evt.startDate);
+            const endDate = stringToDate(evt.endDate);
+            const spanDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            
+            // Find the slot position for this event
+            const localSlot = sortedDayEvents.findIndex(e => getEventIndex(e) === eventIdx);
+            const currentEventTop = localSlot * eventHeight;
+            
+            // Calculate total width: (spanDays * dayWidth) minus borders between cells
+            const totalWidth = (spanDays * dayWidth) - ((spanDays - 1) * borderWidth);
+            
+            // Create text overlay that spans the full event width
+            const textOverlay = createElement('div');
+            textOverlay.className = 'paragraph-event-text-overlay';
+            textOverlay.textContent = evt.text;
+            textOverlay.dataset.eventIdx = eventIdx;
+            textOverlay.title = escapeAttr(evt.text);
+            
+            // Position text to span entire event width
+            // Note: The text will extend beyond the first day's boundaries
+            textOverlay.style.cssText = `
+                position: absolute;
+                top: ${currentEventTop}%;
+                left: 0;
+                width: ${totalWidth}px;
+                height: ${eventHeight}%;
+                display: flex;
+                align-items: center;
+                padding: 2px 4px;
+                pointer-events: none;
+                z-index: 10;
+                overflow: visible;
+                white-space: nowrap;
+                font-size: clamp(7px, 1vw, 9px);
+                font-weight: 500;
+                font-family: var(--font-family-mono);
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+            `;
+            
+            eventsContainer.appendChild(textOverlay);
         });
 
         // Render single-day events

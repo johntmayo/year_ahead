@@ -1384,6 +1384,7 @@ select:focus {
     backdrop-filter: var(--blur-soft);
     border: 1px solid var(--border-glass);
     overflow-x: auto;
+    overflow-y: visible; /* Allow text overlays to extend beyond view boundaries */
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
@@ -1414,7 +1415,7 @@ select:focus {
     position: relative;
     display: flex !important;
     flex-direction: column;
-    overflow: visible;
+    overflow: visible; /* Allow text overlays to extend beyond cell boundaries */
     transition: all var(--transition-fast);
     user-select: none;
     margin: 0 !important;
@@ -1537,9 +1538,19 @@ select:focus {
 
 /* Multi-day events span across multiple cells */
 .paragraph-event-multi-day {
-    /* Width is set dynamically in JS based on span */
-    /* Positioned absolutely to flow across day cells */
+    /* Each piece fills its day cell */
+    /* Pieces are styled to look continuous */
     overflow: visible;
+}
+
+/* Text overlay for multi-day events - spans full event width */
+.paragraph-event-text-overlay {
+    /* Text spans across all days of the event */
+    color: inherit;
+    /* Text inherits color from the event below it */
+    mix-blend-mode: normal;
+    /* Ensure text is readable */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .paragraph-event:hover {
@@ -1554,11 +1565,9 @@ select:focus {
 
 /* Multi-day events span across multiple cells */
 .paragraph-event-multi-day {
-    /* Width is set dynamically in JS based on span */
-    /* Positioned absolutely to flow across day cells */
+    /* Each piece fills its day cell */
+    /* Pieces are styled to look continuous */
     overflow: visible;
-    /* Ensure event can extend beyond its container */
-    will-change: transform;
 }
 
 /* Round right corners on single-day events or when event ends */
