@@ -1427,6 +1427,11 @@ select:focus {
     border: none;
 }
 
+/* When gridlines are hidden, ensure events from adjacent cells touch perfectly */
+.paragraph-view.gridlines-hidden .paragraph-event {
+    /* Events should not extend beyond cell boundaries to prevent overlap artifacts */
+}
+
 /* Remove border on right side to create seamless flow for events */
 .paragraph-day:not(:last-child) {
     border-right: none;
@@ -1520,9 +1525,12 @@ select:focus {
     align-items: center;
     transition: all var(--transition-fast);
     z-index: 2;
-    /* Ensure events touch perfectly - no gaps */
+    /* Ensure events touch perfectly - no gaps, no borders */
     margin: 0;
+    border: none;
     box-sizing: border-box;
+    /* Prevent visual artifacts from overlapping transparency */
+    isolation: isolate;
 }
 
 .paragraph-event:hover {

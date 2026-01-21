@@ -189,6 +189,10 @@ export function renderParagraph() {
             const prevDateKey = dateToString(prevDay);
             const continuesFromPrev = isDateInRange(prevDateKey, evt.startDate, evt.endDate);
 
+            // Check if gridlines are hidden
+            const paragraphView = getById('paragraphView');
+            const gridlinesHidden = paragraphView && paragraphView.classList.contains('gridlines-hidden');
+            
             // Apply styling
             let style = colorStyle;
             style += ` height: ${eventHeight}%;`;
@@ -196,19 +200,31 @@ export function renderParagraph() {
             
             // For multi-day events, make them continuous across cells
             if (isMultiDay) {
-                // Extend event beyond cell boundaries for seamless connection
-                if (continuesFromPrev && continuesNext) {
-                    // Middle of event - extend left and right
-                    style += ' left: -1px; right: -1px; border-radius: 0;';
-                } else if (continuesFromPrev) {
-                    // End of event - extend left, round right corners
-                    style += ' left: -1px; right: 0; border-radius: 0 2px 2px 0;';
-                } else if (continuesNext) {
-                    // Start of event - extend right, round left corners
-                    style += ' left: 0; right: -1px; border-radius: 2px 0 0 2px;';
+                // When gridlines are hidden: events should touch exactly with no overlap
+                // When gridlines are visible: extend slightly to cover the border
+                // Use 0px extension when hidden to prevent transparency overlap artifacts
+                if (gridlinesHidden) {
+                    // No extension - events touch exactly at cell boundaries
+                    if (continuesFromPrev && continuesNext) {
+                        style += ' left: 0; right: 0; border-radius: 0;';
+                    } else if (continuesFromPrev) {
+                        style += ' left: 0; right: 0; border-radius: 0 2px 2px 0;';
+                    } else if (continuesNext) {
+                        style += ' left: 0; right: 0; border-radius: 2px 0 0 2px;';
+                    } else {
+                        style += ' left: 0; right: 0; border-radius: 2px;';
+                    }
                 } else {
-                    // Single day (shouldn't happen for multi-day, but handle it)
-                    style += ' left: 0; right: 0; border-radius: 2px;';
+                    // Gridlines visible - extend slightly to cover border
+                    if (continuesFromPrev && continuesNext) {
+                        style += ' left: -0.5px; right: -0.5px; border-radius: 0;';
+                    } else if (continuesFromPrev) {
+                        style += ' left: -0.5px; right: 0; border-radius: 0 2px 2px 0;';
+                    } else if (continuesNext) {
+                        style += ' left: 0; right: -0.5px; border-radius: 2px 0 0 2px;';
+                    } else {
+                        style += ' left: 0; right: 0; border-radius: 2px;';
+                    }
                 }
             } else {
                 // Single day event - small border radius, contained within cell
