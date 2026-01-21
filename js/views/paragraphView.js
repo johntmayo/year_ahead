@@ -123,7 +123,6 @@ export function renderParagraph() {
     });
     
     // Check if gridlines are hidden (used for width calculations)
-    const paragraphView = getById('paragraphView');
     const gridlinesHidden = paragraphView && paragraphView.classList.contains('gridlines-hidden');
     const dayWidth = 50; // Base width in pixels
     const borderWidth = gridlinesHidden ? 0 : 0.5; // Border width when visible

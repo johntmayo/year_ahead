@@ -1384,7 +1384,6 @@ select:focus {
     backdrop-filter: var(--blur-soft);
     border: 1px solid var(--border-glass);
     overflow-x: auto;
-    overflow-y: visible; /* Allow text overlays to extend beyond view boundaries */
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
@@ -1561,13 +1560,6 @@ select:focus {
 
 .paragraph-event.dragging {
     opacity: 0.5;
-}
-
-/* Multi-day events span across multiple cells */
-.paragraph-event-multi-day {
-    /* Each piece fills its day cell */
-    /* Pieces are styled to look continuous */
-    overflow: visible;
 }
 
 /* Round right corners on single-day events or when event ends */
