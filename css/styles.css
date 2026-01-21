@@ -1320,12 +1320,22 @@ select:focus {
    ============================================ */
 
 .paragraph-controls {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 10;
-    display: flex;
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    z-index: 100 !important;
+    display: flex !important;
     gap: 8px;
+    pointer-events: none;
+    flex: none !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: auto !important;
+    max-width: none !important;
+}
+
+.paragraph-controls > * {
+    pointer-events: auto;
 }
 
 .paragraph-toggle {
@@ -1383,6 +1393,13 @@ select:focus {
     align-content: flex-start;
     width: 100%;
     box-sizing: border-box;
+}
+
+/* Exclude controls from flex layout */
+.paragraph-view > .paragraph-controls {
+    position: absolute !important;
+    flex: none !important;
+    order: 9999;
 }
 
 .paragraph-day {

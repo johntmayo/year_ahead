@@ -29,7 +29,25 @@ export function renderParagraph() {
         return;
     }
 
+    // Preserve the controls container when clearing
+    const controlsContainer = paragraphView.querySelector('.paragraph-controls');
     clearChildren(paragraphView);
+    
+    // Restore controls if they existed
+    if (controlsContainer) {
+        paragraphView.appendChild(controlsContainer);
+    } else {
+        // Create controls if they don't exist
+        const controls = createElement('div', { className: 'paragraph-controls' });
+        const toggle = createElement('button', { 
+            className: 'paragraph-toggle',
+            id: 'paragraphGridlinesToggle',
+            title: 'Toggle Gridlines'
+        });
+        toggle.innerHTML = '<span class="toggle-icon">⊞</span><span class="toggle-label">Gridlines</span>';
+        controls.appendChild(toggle);
+        paragraphView.appendChild(controls);
+    }
 
     const currentYear = store.get('currentYear');
 
