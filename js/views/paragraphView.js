@@ -228,6 +228,7 @@ export function showParagraphView() {
         paragraphView.style.display = 'flex';
         paragraphView.style.flexDirection = 'row';
         paragraphView.style.flexWrap = 'wrap';
+        setupGridlinesToggle();
     }
     if (yearView) yearView.style.display = 'none';
     if (monthView) monthView.style.display = 'none';
@@ -275,5 +276,56 @@ function attachParagraphEventHandlers(container) {
             }
         };
     });
+}
+
+/**
+ * Setup the gridlines toggle functionality
+ */
+function setupGridlinesToggle() {
+    const toggle = getById('paragraphGridlinesToggle');
+    if (!toggle) return;
+
+    const paragraphView = getById('paragraphView');
+    if (!paragraphView) return;
+
+    // Check localStorage for saved preference
+    const gridlinesVisible = localStorage.getItem('paragraphGridlines') !== 'false';
+    updateGridlinesVisibility(gridlinesVisible);
+    updateToggleButton(toggle, gridlinesVisible);
+
+    toggle.onclick = () => {
+        const isVisible = !paragraphView.classList.contains('gridlines-hidden');
+        const newState = !isVisible;
+        updateGridlinesVisibility(newState);
+        updateToggleButton(toggle, newState);
+        localStorage.setItem('paragraphGridlines', newState.toString());
+    };
+}
+
+/**
+ * Update gridlines visibility
+ */
+function updateGridlinesVisibility(visible) {
+    const paragraphView = getById('paragraphView');
+    if (!paragraphView) return;
+
+    if (visible) {
+        paragraphView.classList.remove('gridlines-hidden');
+    } else {
+        paragraphView.classList.add('gridlines-hidden');
+    }
+}
+
+/**
+ * Update toggle button appearance
+ */
+function updateToggleButton(button, isVisible) {
+    if (isVisible) {
+        button.classList.add('active');
+        button.title = 'Hide Gridlines';
+    } else {
+        button.classList.remove('active');
+        button.title = 'Show Gridlines';
+    }
 }
 
