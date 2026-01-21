@@ -159,46 +159,47 @@ export function renderParagraph() {
             eventEl.dataset.eventIdx = eventIdx;
             eventEl.title = escapeAttr(evt.text);
 
+            // Check if event continues to next/previous day for continuous styling
+            const nextDay = new Date(dayData.date);
+            nextDay.setDate(nextDay.getDate() + 1);
+            const nextDateKey = dateToString(nextDay);
+            const continuesNext = isDateInRange(nextDateKey, evt.startDate, evt.endDate);
+
+            const prevDay = new Date(dayData.date);
+            prevDay.setDate(prevDay.getDate() - 1);
+            const prevDateKey = dateToString(prevDay);
+            const continuesFromPrev = isDateInRange(prevDateKey, evt.startDate, evt.endDate);
+
             // Apply styling
             let style = colorStyle;
             style += ` height: ${eventHeight}%;`;
             style += ` top: ${eventTop}%;`;
             
-            // For multi-day events, handle flow across line breaks
+            // For multi-day events, make them continuous across cells
             if (isMultiDay) {
-                // Check if event continues to next day
-                const nextDay = new Date(dayData.date);
-                nextDay.setDate(nextDay.getDate() + 1);
-                const nextDateKey = dateToString(nextDay);
-                const continuesNext = isDateInRange(nextDateKey, evt.startDate, evt.endDate);
-
-                // Check if event continues from previous day
-                const prevDay = new Date(dayData.date);
-                prevDay.setDate(prevDay.getDate() - 1);
-                const prevDateKey = dateToString(prevDay);
-                const continuesFromPrev = isDateInRange(prevDateKey, evt.startDate, evt.endDate);
-
-                if (isEventStart && !continuesNext) {
-                    // Single day event (shouldn't happen if isMultiDay is true, but handle it)
-                    style += ' border-radius: 0;';
-                } else if (isEventStart) {
-                    // Start of event - round left corners only
-                    style += ' border-radius: 2px 0 0 2px;';
-                } else if (isEventEnd) {
-                    // End of event - round right corners only
-                    style += ' border-radius: 0 2px 2px 0;';
+                // Extend event beyond cell boundaries for seamless connection
+                if (continuesFromPrev && continuesNext) {
+                    // Middle of event - extend left and right
+                    style += ' left: -1px; right: -1px; border-radius: 0;';
+                } else if (continuesFromPrev) {
+                    // End of event - extend left, round right corners
+                    style += ' left: -1px; right: 0; border-radius: 0 2px 2px 0;';
+                } else if (continuesNext) {
+                    // Start of event - extend right, round left corners
+                    style += ' left: 0; right: -1px; border-radius: 2px 0 0 2px;';
                 } else {
-                    // Middle of event - no border radius for seamless flow
-                    style += ' border-radius: 0;';
+                    // Single day (shouldn't happen for multi-day, but handle it)
+                    style += ' left: 0; right: 0; border-radius: 2px;';
                 }
             } else {
-                // Single day event - small border radius
-                style += ' border-radius: 2px;';
+                // Single day event - small border radius, contained within cell
+                style += ' left: 0; right: 0; border-radius: 2px;';
             }
 
             eventEl.style.cssText = style;
             // Only show text on the start day of multi-day events, or always for single-day events
-            eventEl.textContent = isEventStart ? escapeHtml(evt.text) : '';
+            // textContent automatically escapes HTML safely, so we don't need escapeHtml here
+            eventEl.textContent = isEventStart ? evt.text : '';
 
             eventsContainer.appendChild(eventEl);
         });

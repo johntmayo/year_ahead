@@ -1326,7 +1326,7 @@ select:focus {
     position: relative;
     display: flex !important;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
     transition: all var(--transition-fast);
     user-select: none;
     margin: 0 !important;
@@ -1334,7 +1334,7 @@ select:focus {
     box-sizing: border-box;
 }
 
-/* Remove border on right side to create seamless flow */
+/* Remove border on right side to create seamless flow for events */
 .paragraph-day:not(:last-child) {
     border-right: none;
 }
@@ -1405,6 +1405,7 @@ select:focus {
     flex-direction: column;
     pointer-events: none;
     z-index: 1;
+    overflow: visible;
 }
 
 .paragraph-event {
