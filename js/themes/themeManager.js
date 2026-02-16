@@ -114,42 +114,33 @@ function setupThemeToggle() {
  * @returns {string} CSS style string
  */
 export function getEventColorStyle(baseColor, isHover = false, isMultiDay = false) {
-    // Glass & Glow: soft gradient with glow effect
-    // Reduced transparency by 30% (increased opacity)
     const rgb = hexToRgb(baseColor);
     if (!rgb) return `background: ${baseColor};`;
-    
+
     const { r, g, b } = rgb;
-    // Original: 0.15 normal, 0.3 hover. Reduced transparency by 30% means:
-    // 0.15 * 1.3 = 0.195 (normal), 0.3 * 1.3 = 0.39 (hover)
-    const alpha = isHover ? 0.39 : 0.195;
-    const alphaBorder = 0.8;
-    
+    const tint = (value, amount) => Math.max(0, Math.min(255, value + amount));
+    const light = `rgb(${tint(r, 24)}, ${tint(g, 24)}, ${tint(b, 24)})`;
+    const solid = `rgb(${r}, ${g}, ${b})`;
+    const dark = `rgb(${tint(r, -18)}, ${tint(g, -18)}, ${tint(b, -18)})`;
+
     const mode = getCurrentMode();
-    const borderColor = mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.6)';
-    const shadowColor = mode === 'dark' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)';
-    
-    // For multi-day events, use a painterly uniform wash
-    // Completely uniform color (no gradient) so it flows seamlessly across cells
+    const borderColor = mode === 'dark' ? 'rgba(255, 255, 255, 0.24)' : 'rgba(20, 24, 28, 0.2)';
+    const shadowColor = mode === 'dark' ? 'rgba(0, 0, 0, 0.36)' : 'rgba(0, 0, 0, 0.14)';
+
     if (isMultiDay) {
-        // Uniform color wash - no gradient to avoid repeating pattern
-        // Remove inset shadow to prevent visible edges between cells
-        const washAlpha = alpha * 1.15; // Slightly more opaque for better visibility
         return `
-            background: rgba(${r}, ${g}, ${b}, ${washAlpha});
+            background: ${solid};
             border: none;
-            box-shadow: 0 0 8px rgba(${r}, ${g}, ${b}, ${isHover ? 0.18 : 0.1});
+            box-shadow: 0 0 0 1px ${borderColor}, 0 1px 3px ${shadowColor};
             color: ${getContrastColor(baseColor)};
         `.trim();
     } else {
-        // Single-day events keep the diagonal gradient for visual interest
         return `
             background: linear-gradient(135deg, 
-                rgba(${r}, ${g}, ${b}, ${alpha * 2}) 0%, 
-                rgba(${r}, ${g}, ${b}, ${alpha}) 100%);
+                ${isHover ? light : solid} 0%,
+                ${isHover ? solid : dark} 100%);
             border: 1px solid ${borderColor};
-            box-shadow: 0 0 8px rgba(${r}, ${g}, ${b}, ${isHover ? 0.4 : 0.2}),
-                        0 2px 4px ${shadowColor};
+            box-shadow: 0 1px 3px ${shadowColor};
             color: ${getContrastColor(baseColor)};
         `.trim();
     }

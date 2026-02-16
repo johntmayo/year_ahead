@@ -78,6 +78,9 @@ export function renderEventList() {
     const events = store.get('events');
 
     let html = '';
+    if (dayEvents.length === 0) {
+        html += `<div class="event-item"><p>No events on this date yet. Use "Create New Event" to add one.</p></div>`;
+    }
     dayEvents.forEach((evt) => {
         const eventIdx = events.indexOf(evt);
         const pressureEstimate = estimateEventPressure(evt);
@@ -89,7 +92,7 @@ export function renderEventList() {
         html += `<div class="event-item">`;
         html += `<div class="event-item-row">`;
         html += `<input type="text" value="${escapeAttr(evt.text)}" placeholder="Event name" data-event-idx="${eventIdx}" data-field="text">`;
-        html += `<button data-event-idx="${eventIdx}" data-action="delete">Delete</button>`;
+        html += `<button class="event-delete-btn" data-event-idx="${eventIdx}" data-action="delete">Delete Event</button>`;
         html += `</div>`;
         html += `<div class="event-item-row">`;
         html += `<div class="color-picker-mini">`;
@@ -125,8 +128,8 @@ export function renderEventList() {
         html += `<div class="pressure-prediction" data-event-idx="${eventIdx}" data-role="pressurePrediction">
             <span class="prediction-title">Predicted effect:</span> ${escapeHtml(formatPrediction(prediction))}
         </div>`;
-        html += `<button class="trust-toggle-btn" type="button" data-action="toggle-trust" data-event-idx="${eventIdx}" aria-expanded="false">
-            How pressure is estimated
+        html += `<button class="trust-toggle-btn btn-link" type="button" data-action="toggle-trust" data-event-idx="${eventIdx}" aria-expanded="false">
+            ℹ Learn how pressure is estimated
         </button>`;
         html += `<div class="trust-panel" data-event-idx="${eventIdx}" data-role="trustPanel" hidden>
             <p><strong>Weighting:</strong> duration ${Math.round(pressureEstimate.weights.duration * 100)}%, controllability ${Math.round(pressureEstimate.weights.controllability * 100)}%, anticipation ${Math.round(pressureEstimate.weights.anticipation * 100)}%.</p>
@@ -256,7 +259,7 @@ export function addEventFromModal() {
     if (!selectedDate) return;
 
     addEvent({
-        text: 'New Event',
+        text: 'Untitled Event',
         color: store.get('selectedColor'),
         startDate: selectedDate,
         endDate: selectedDate

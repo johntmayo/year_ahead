@@ -33,6 +33,7 @@ import { initTemporalPanel, renderTemporalPanel } from './ui/temporalPanel.js';
  * Initialize the application
  */
 let appInitialized = false;
+const INSIGHTS_SETUP_KEY = 'yearAheadInsightsSetupOpen';
 
 async function initApp() {
     if (appInitialized) {
@@ -214,6 +215,23 @@ function attachGlobalHandlers() {
             e.preventDefault();
             toggleInstructions();
         }
+    });
+
+    initInsightsSetup();
+}
+
+/**
+ * Persist Insights & Setup disclosure state.
+ */
+function initInsightsSetup() {
+    const panel = getById('insightsSetup');
+    if (!panel) return;
+
+    const savedState = localStorage.getItem(INSIGHTS_SETUP_KEY);
+    panel.open = savedState === 'true';
+
+    panel.addEventListener('toggle', () => {
+        localStorage.setItem(INSIGHTS_SETUP_KEY, panel.open ? 'true' : 'false');
     });
 }
 

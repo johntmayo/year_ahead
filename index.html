@@ -51,7 +51,10 @@
                     <button class="view-toggle-option" data-view="paragraph">Paragraph</button>
                 </div>
                 <div class="settings-menu-wrapper">
-                    <button class="data-btn settings-btn" id="settingsMenuButton" aria-expanded="false" aria-controls="settingsMenu">Settings</button>
+                    <button class="data-btn settings-btn icon-btn" id="settingsMenuButton" aria-expanded="false" aria-controls="settingsMenu" aria-label="Open settings">
+                        <span aria-hidden="true">⚙</span>
+                        <span class="settings-label">Settings</span>
+                    </button>
                     <div class="settings-menu" id="settingsMenu" hidden>
                         <span class="auth-user-badge" id="authUserBadge" style="display: none;"></span>
                         <div class="theme-toggle" id="themeToggle">
@@ -65,10 +68,10 @@
                             </button>
                         </div>
                         <div class="data-controls">
-                            <button class="data-btn export-btn">Export Data</button>
-                            <button class="data-btn import-btn">Import Data</button>
+                            <button class="data-btn export-btn btn-primary">⬇ Export</button>
+                            <button class="data-btn import-btn btn-secondary">⬆ Import</button>
                             <input type="file" id="importFile" accept=".json">
-                            <button class="data-btn signout-btn" id="signOutBtn" style="display: none;">Sign Out</button>
+                            <button class="data-btn signout-btn btn-danger" id="signOutBtn" style="display: none;">↩ Sign Out</button>
                         </div>
                     </div>
                 </div>
@@ -102,30 +105,51 @@
                 <option value="4">4 Lines (Quarter)</option>
             </select>
         </div>
-        <div class="temporal-panel" id="temporalPanel"></div>
     </div>
 
-    <div class="year-string-container" id="yearStringContainer" style="display: none;">
-        <div class="year-string" id="yearString"></div>
+    <div id="yearView" class="year-view"></div>
+    <div id="monthView" class="month-view" style="display: none;"></div>
+    <div id="timelineView" class="timeline-view" style="display: none;"></div>
+    <div id="paragraphView" class="paragraph-view" style="display: none;">
+        <div class="paragraph-controls">
+            <button class="paragraph-toggle" id="paragraphGridlinesToggle" title="Toggle Gridlines">
+                <span class="toggle-icon">⊞</span>
+                <span class="toggle-label">Gridlines</span>
+            </button>
+        </div>
     </div>
 
-    <div class="values-anchor" id="valuesAnchor">
-        <h3 id="valuesDeclarationPrompt">What matters most this year?</h3>
-        <textarea
-            id="valuesDeclarationInput"
-            rows="2"
-            maxlength="280"
-            placeholder="Optional. Capture what matters most for this year in your own words."
-            aria-label="What matters most this year?"></textarea>
-        <p class="values-anchor-note">Optional reflection anchor. This does not score or grade your year.</p>
-    </div>
+    <details class="insights-setup" id="insightsSetup">
+        <summary class="insights-setup-summary">
+            <span class="summary-title">Insights & Setup</span>
+            <span class="summary-subtitle">Optional tools and readouts</span>
+        </summary>
+        <div class="insights-setup-content">
+            <div class="temporal-panel" id="temporalPanel"></div>
 
-    <div class="insight-strip" id="insightStrip"></div>
+            <div class="year-string-container" id="yearStringContainer" style="display: none;">
+                <div class="year-string" id="yearString"></div>
+            </div>
 
-    <div class="category-key">
-        <h3>Personal Category Key</h3>
-        <div class="category-items" id="categoryItems"></div>
-    </div>
+            <div class="values-anchor" id="valuesAnchor">
+                <h3 id="valuesDeclarationPrompt">What matters most this year?</h3>
+                <textarea
+                    id="valuesDeclarationInput"
+                    rows="2"
+                    maxlength="280"
+                    placeholder="Optional. Capture what matters most for this year in your own words."
+                    aria-label="What matters most this year?"></textarea>
+                <p class="values-anchor-note">Optional reflection anchor. This does not score or grade your year.</p>
+            </div>
+
+            <div class="insight-strip" id="insightStrip"></div>
+
+            <div class="category-key">
+                <h3>Personal Category Key</h3>
+                <div class="category-items" id="categoryItems"></div>
+            </div>
+        </div>
+    </details>
 
     <div class="info-panels">
         <div class="notepad collapsed" id="notepad">
@@ -165,24 +189,12 @@
         </div>
     </div>
 
-    <div id="yearView" class="year-view"></div>
-    <div id="monthView" class="month-view" style="display: none;"></div>
-    <div id="timelineView" class="timeline-view" style="display: none;"></div>
-    <div id="paragraphView" class="paragraph-view" style="display: none;">
-        <div class="paragraph-controls">
-            <button class="paragraph-toggle" id="paragraphGridlinesToggle" title="Toggle Gridlines">
-                <span class="toggle-icon">⊞</span>
-                <span class="toggle-label">Gridlines</span>
-            </button>
-        </div>
-    </div>
-
     <div id="modal" class="modal">
         <div class="modal-content">
             <div class="modal-header" id="modalHeader"></div>
             <div class="event-list" id="eventList"></div>
-            <button class="add-event-btn">+ Add Event</button>
-            <button class="close-btn">Close</button>
+            <button class="add-event-btn btn-primary" type="button">＋ Create New Event</button>
+            <button class="close-btn btn-secondary" type="button">Close</button>
         </div>
     </div>
 

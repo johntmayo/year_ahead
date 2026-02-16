@@ -94,8 +94,7 @@ export function formatPrediction(prediction) {
  */
 export function getPressureVisualStyle(event) {
     const score = estimateEventPressure(event).score;
-    const opacity = 0.72 + (score * 0.28);
-    const saturation = 88 + (score * 28);
-    const brightness = 90 + (score * 10);
-    return `opacity: ${opacity.toFixed(2)}; filter: saturate(${saturation.toFixed(0)}%) brightness(${brightness.toFixed(0)}%);`;
+    const saturation = 94 + (score * 20);
+    const brightness = 94 + (score * 8);
+    return `opacity: 1; filter: saturate(${saturation.toFixed(0)}%) brightness(${brightness.toFixed(0)}%);`;
 }
