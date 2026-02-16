@@ -32,7 +32,7 @@ function normalizeEvents(data, currentYear) {
             controllability: evt.controllability || 'high',
             anticipation: !!evt.anticipation,
             recovery: evt.recovery || 'neutral'
-        });
+        }));
     } else if (data.events && typeof data.events === 'object') {
         Object.keys(data.events).forEach(dateKey => {
             const eventYear = new Date(dateKey + 'T00:00:00').getFullYear();
