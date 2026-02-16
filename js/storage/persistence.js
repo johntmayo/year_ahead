@@ -77,10 +77,10 @@ function applyLoadedData(data) {
 
     const notepad = getById('notepad');
     if (notepad) {
-        if (data.notepadCollapsed === true) {
-            notepad.classList.add('collapsed');
-        } else {
+        if (data.notepadCollapsed === false) {
             notepad.classList.remove('collapsed');
+        } else {
+            notepad.classList.add('collapsed');
         }
     }
 }
@@ -93,7 +93,7 @@ function clearCurrentYearData() {
     }
     const notepad = getById('notepad');
     if (notepad) {
-        notepad.classList.remove('collapsed');
+        notepad.classList.add('collapsed');
     }
 }
 

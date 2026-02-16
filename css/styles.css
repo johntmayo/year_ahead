@@ -593,20 +593,28 @@ button:active {
    ============================================ */
 
 .info-panels {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 850;
     display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
+    flex-direction: column;
+    gap: 10px;
+    width: min(360px, calc(100vw - 40px));
+    pointer-events: none;
 }
 
 .instructions-panel {
-    flex: 1;
+    pointer-events: auto;
     background: var(--bg-card);
-    padding: 20px 25px;
-    border-radius: var(--radius-2xl);
+    padding: 14px 16px;
+    border-radius: var(--radius-xl);
     box-shadow: var(--shadow-lg);
     backdrop-filter: var(--blur-soft);
     border: 1px solid var(--border-glass);
     transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    max-height: min(44vh, 360px);
+    overflow: hidden;
 }
 
 [data-theme="glass-glow"] .instructions-panel:hover {
@@ -628,11 +636,13 @@ button:active {
 
 .instructions-panel ul {
     margin: 0;
-    padding-left: 20px;
-    font-size: 13px;
-    line-height: 1.6;
+    padding-left: 18px;
+    font-size: 12px;
+    line-height: 1.45;
     color: var(--text-secondary);
     font-family: var(--font-family-body);
+    max-height: min(30vh, 220px);
+    overflow-y: auto;
 }
 
 .instructions-panel li {
@@ -648,7 +658,7 @@ button:active {
 }
 
 .instructions-header h3 {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
     margin: 0;
     color: var(--text-primary);
 }
@@ -664,7 +674,7 @@ button:active {
 }
 
 .instructions-content {
-    margin-top: 10px;
+    margin-top: 8px;
     max-height: 1000px;
     transition: max-height var(--transition-normal), opacity var(--transition-normal), margin-top var(--transition-normal);
     overflow: hidden;
@@ -682,14 +692,16 @@ button:active {
 
 /* Notepad */
 .notepad {
-    flex: 0 0 48%;
+    pointer-events: auto;
     background: var(--bg-notepad);
-    padding: 20px 25px;
-    border-radius: var(--radius-2xl);
+    padding: 14px 16px;
+    border-radius: var(--radius-xl);
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border-notepad);
     transition: transform var(--transition-normal), box-shadow var(--transition-normal);
     position: relative;
+    max-height: min(44vh, 360px);
+    overflow: hidden;
 }
 
 .notepad > * {
@@ -702,15 +714,6 @@ button:active {
     box-shadow: var(--shadow-xl);
 }
 
-@media (max-width: 768px) {
-    .info-panels {
-        flex-direction: column;
-    }
-    .notepad {
-        flex: 1;
-    }
-}
-
 .notepad-header {
     display: flex;
     align-items: center;
@@ -720,7 +723,7 @@ button:active {
 }
 
 .notepad-header h3 {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
     margin: 0;
     color: var(--text-primary);
     font-family: var(--font-family-header);
@@ -741,7 +744,7 @@ button:active {
 }
 
 .notepad-content {
-    margin-top: 10px;
+    margin-top: 8px;
     max-height: 1000px;
     transition: max-height var(--transition-normal), opacity var(--transition-normal), margin-top var(--transition-normal);
     overflow: hidden;
@@ -755,8 +758,9 @@ button:active {
 
 .notepad textarea {
     width: 100%;
-    min-height: 150px;
-    padding: 14px;
+    min-height: 140px;
+    height: min(28vh, 210px);
+    padding: 12px;
     border: 1px solid var(--border-light);
     border-radius: var(--radius-lg);
     font-size: var(--font-size-md);
@@ -766,6 +770,26 @@ button:active {
     background: var(--bg-card);
     color: var(--text-primary);
     transition: all var(--transition-fast);
+}
+
+@media (max-width: 1024px) {
+    .info-panels {
+        position: static;
+        width: 100%;
+        margin-bottom: 16px;
+        pointer-events: auto;
+    }
+
+    .notepad,
+    .instructions-panel {
+        max-height: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .info-panels {
+        flex-direction: column;
+    }
 }
 
 .notepad textarea:focus {
@@ -1538,7 +1562,8 @@ select:focus {
 
 /* When gridlines are hidden, ensure events from adjacent cells touch perfectly */
 .paragraph-view.gridlines-hidden .paragraph-event {
-    /* Events should not extend beyond cell boundaries to prevent overlap artifacts */
+    left: 0;
+    right: 0;
 }
 
 /* Remove border on right side to create seamless flow for events */
@@ -1687,7 +1712,7 @@ select:focus {
 
 /* When gridlines are hidden, ensure multi-day events touch perfectly */
 .paragraph-view.gridlines-hidden .paragraph-event-multi-day {
-    /* Events should extend to cover the full span without gaps */
+    border-radius: 0;
 }
 
 .paragraph-day.drag-creating .drag-preview-event {
