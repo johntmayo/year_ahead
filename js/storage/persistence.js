@@ -31,7 +31,8 @@ function normalizeEvents(data, currentYear) {
             ...evt,
             controllability: evt.controllability || 'high',
             anticipation: !!evt.anticipation,
-            recovery: evt.recovery || 'neutral'
+            recovery: evt.recovery || 'neutral',
+            notes: evt.notes || ''
         }));
     } else if (data.events && typeof data.events === 'object') {
         Object.keys(data.events).forEach(dateKey => {
@@ -45,7 +46,8 @@ function normalizeEvents(data, currentYear) {
                         endDate: dateKey,
                         controllability: evt.controllability || 'high',
                         anticipation: !!evt.anticipation,
-                        recovery: evt.recovery || 'neutral'
+                        recovery: evt.recovery || 'neutral',
+                        notes: evt.notes || ''
                     });
                 });
             }

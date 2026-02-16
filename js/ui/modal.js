@@ -17,6 +17,7 @@ import {
     updateEventControllability,
     updateEventAnticipation,
     updateEventRecovery,
+    updateEventNotes,
     deleteEvent,
     getEventsForDay
 } from '../events/eventManager.js';
@@ -123,6 +124,9 @@ export function renderEventList() {
                 <option value="restorative" ${(evt.recovery || 'neutral') === 'restorative' ? 'selected' : ''}>Restorative for me</option>
                 <option value="draining" ${(evt.recovery || 'neutral') === 'draining' ? 'selected' : ''}>Draining for me</option>
             </select>
+        </label>`;
+        html += `<label>Event notes
+            <textarea data-event-idx="${eventIdx}" data-field="notes" rows="3" placeholder="Optional details, reminders, or context.">${escapeHtml(evt.notes || '')}</textarea>
         </label>`;
         html += `</div>`;
         html += `<div class="pressure-prediction" data-event-idx="${eventIdx}" data-role="pressurePrediction">
@@ -233,6 +237,15 @@ function attachModalEventHandlers() {
         };
     });
 
+    // Event notes changes
+    eventList.querySelectorAll('textarea[data-field="notes"]').forEach(textarea => {
+        textarea.onchange = (e) => {
+            const idx = parseInt(e.target.dataset.eventIdx);
+            updateEventNotes(idx, e.target.value);
+            refreshView();
+        };
+    });
+
     // Trust panel progressive disclosure
     eventList.querySelectorAll('[data-action="toggle-trust"]').forEach(button => {
         button.onclick = (e) => {
@@ -262,7 +275,8 @@ export function addEventFromModal() {
         text: 'Untitled Event',
         color: store.get('selectedColor'),
         startDate: selectedDate,
-        endDate: selectedDate
+        endDate: selectedDate,
+        notes: ''
     });
 
     renderEventList();

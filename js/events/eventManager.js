@@ -22,7 +22,8 @@ export function addEvent(eventData) {
         endDate: eventData.endDate || eventData.startDate,
         controllability: eventData.controllability || 'high',
         anticipation: eventData.anticipation || false,
-        recovery: eventData.recovery || 'neutral'
+        recovery: eventData.recovery || 'neutral',
+        notes: eventData.notes || ''
     };
     store.addEvent(newEvent);
     saveData();
@@ -89,6 +90,19 @@ export function updateEventRecovery(index, recovery) {
     const events = store.get('events');
     if (events[index]) {
         store.updateEvent(index, { recovery });
+        saveData();
+    }
+}
+
+/**
+ * Update event notes
+ * @param {number} index - Event index
+ * @param {string} notes - New notes text
+ */
+export function updateEventNotes(index, notes) {
+    const events = store.get('events');
+    if (events[index]) {
+        store.updateEvent(index, { notes });
         saveData();
     }
 }
@@ -183,7 +197,8 @@ export function createEventFromDrag(startDate, endDate) {
         endDate: actualEnd,
         controllability: 'high',
         anticipation: false,
-        recovery: 'neutral'
+        recovery: 'neutral',
+        notes: ''
     };
 
     store.addEvent(newEvent);
