@@ -19,8 +19,8 @@ import { changeMonth } from './views/monthView.js';
 import { changeTimelineLines } from './views/timelineView.js';
 import { initModalListeners } from './ui/modal.js';
 import { renderCategoryKey } from './ui/categoryKey.js';
-import { initNotepad } from './ui/notepad.js';
-import { initInstructions } from './ui/instructions.js';
+import { initNotepad, toggleNotepad } from './ui/notepad.js';
+import { initInstructions, toggleInstructions } from './ui/instructions.js';
 import { initTheme } from './themes/themeManager.js';
 import { renderYearString } from './ui/yearString.js';
 import { initAuthGate } from './auth/authUI.js';
@@ -164,6 +164,29 @@ function attachGlobalHandlers() {
             });
         };
     }
+
+    // Keyboard shortcuts for utility panels.
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+        const target = e.target;
+        const isTyping =
+            target instanceof HTMLElement &&
+            (target.isContentEditable ||
+                ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+        if (isTyping) return;
+
+        if (e.key.toLowerCase() === 'n') {
+            e.preventDefault();
+            toggleNotepad();
+            return;
+        }
+
+        if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
+            e.preventDefault();
+            toggleInstructions();
+        }
+    });
 }
 
 // Initialize when DOM is ready

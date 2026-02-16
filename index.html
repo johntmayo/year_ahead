@@ -110,21 +110,28 @@
 
     <div class="info-panels">
         <div class="notepad collapsed" id="notepad">
-            <div class="notepad-header">
-                <h3 id="notepadHeader">Notes</h3>
-                <span class="notepad-toggle">▼</span>
+            <div class="notepad-header" role="button" tabindex="0" aria-expanded="false">
+                <h3 id="notepadHeader"><span class="panel-icon" aria-hidden="true">📝</span> Notes</h3>
+                <div class="panel-header-actions">
+                    <button class="panel-pin-btn" id="notepadPinBtn" type="button" aria-pressed="false" title="Pin Notes panel">📌</button>
+                    <span class="notepad-toggle">▼</span>
+                </div>
             </div>
             <div class="notepad-content">
                 <textarea id="notepadText" placeholder="Jot down your thoughts, reminders, or things to do here..."></textarea>
             </div>
         </div>
         <div class="instructions-panel collapsed" id="instructionsPanel">
-            <div class="instructions-header">
-                <h3>How to Use</h3>
-                <span class="instructions-toggle">▼</span>
+            <div class="instructions-header" role="button" tabindex="0" aria-expanded="false">
+                <h3><span class="panel-icon" aria-hidden="true">❓</span> How to Use</h3>
+                <div class="panel-header-actions">
+                    <button class="panel-pin-btn" id="instructionsPinBtn" type="button" aria-pressed="false" title="Pin How-To panel">📌</button>
+                    <span class="instructions-toggle">▼</span>
+                </div>
             </div>
             <div class="instructions-content">
                 <ul>
+                    <li><strong>Shortcuts:</strong> Press <strong>N</strong> for Notes and <strong>?</strong> for How to Use</li>
                     <li><strong>Create Events:</strong> Click and drag across days to create multi-day events</li>
                     <li><strong>Move Events:</strong> Click and drag an existing event to move it to a new date</li>
                     <li><strong>Edit Events:</strong> Click any day or event to open the editor</li>

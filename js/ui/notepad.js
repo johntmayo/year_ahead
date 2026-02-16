@@ -6,7 +6,14 @@ import { getById, toggleClass, hasClass } from '../utils/dom.js';
 import { saveData, saveNotepadState } from '../storage/persistence.js';
 
 const NOTEPAD_AUTO_COLLAPSE_MS = 60000;
+const NOTEPAD_PINNED_KEY = 'notepadPinned';
 let notepadInactivityTimer = null;
+
+function syncNotepadHeaderState(isCollapsed) {
+    const notepadHeader = document.querySelector('.notepad-header');
+    if (!notepadHeader) return;
+    notepadHeader.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+}
 
 function clearNotepadInactivityTimer() {
     if (notepadInactivityTimer) {
@@ -15,11 +22,29 @@ function clearNotepadInactivityTimer() {
     }
 }
 
+function isNotepadPinned() {
+    return localStorage.getItem(NOTEPAD_PINNED_KEY) === 'true';
+}
+
+function syncNotepadPinnedState() {
+    const pinned = isNotepadPinned();
+    const notepad = getById('notepad');
+    const pinBtn = getById('notepadPinBtn');
+
+    if (notepad) {
+        notepad.classList.toggle('pinned', pinned);
+    }
+    if (pinBtn) {
+        pinBtn.setAttribute('aria-pressed', pinned ? 'true' : 'false');
+        pinBtn.title = pinned ? 'Unpin Notes panel' : 'Pin Notes panel';
+    }
+}
+
 function scheduleNotepadAutoCollapse() {
     clearNotepadInactivityTimer();
 
     const notepad = getById('notepad');
-    if (!notepad || hasClass(notepad, 'collapsed')) return;
+    if (!notepad || hasClass(notepad, 'collapsed') || isNotepadPinned()) return;
 
     notepadInactivityTimer = setTimeout(() => {
         if (!hasClass(notepad, 'collapsed')) {
@@ -39,6 +64,7 @@ export function toggleNotepad() {
     toggleClass(notepad, 'collapsed');
     const isCollapsed = hasClass(notepad, 'collapsed');
     saveNotepadState(isCollapsed);
+    syncNotepadHeaderState(isCollapsed);
 
     if (isCollapsed) {
         clearNotepadInactivityTimer();
@@ -54,9 +80,31 @@ export function initNotepad() {
     const notepadHeader = document.querySelector('.notepad-header');
     const notepadText = getById('notepadText');
     const notepad = getById('notepad');
+    const notepadPinBtn = getById('notepadPinBtn');
 
     if (notepadHeader) {
         notepadHeader.onclick = toggleNotepad;
+        notepadHeader.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleNotepad();
+            }
+        };
+    }
+
+    if (notepadPinBtn) {
+        notepadPinBtn.onclick = (e) => {
+            e.stopPropagation();
+            const nextPinnedState = !isNotepadPinned();
+            localStorage.setItem(NOTEPAD_PINNED_KEY, nextPinnedState ? 'true' : 'false');
+            syncNotepadPinnedState();
+
+            if (nextPinnedState) {
+                clearNotepadInactivityTimer();
+            } else if (notepad && !hasClass(notepad, 'collapsed')) {
+                scheduleNotepadAutoCollapse();
+            }
+        };
     }
 
     if (notepad) {
@@ -80,6 +128,9 @@ export function initNotepad() {
     if (notepad && !hasClass(notepad, 'collapsed')) {
         scheduleNotepadAutoCollapse();
     }
+
+    syncNotepadHeaderState(!!notepad && hasClass(notepad, 'collapsed'));
+    syncNotepadPinnedState();
 }
 
 /**
@@ -115,4 +166,6 @@ export function setNotepadCollapsed(collapsed) {
     } else {
         notepad.classList.remove('collapsed');
     }
+
+    syncNotepadHeaderState(collapsed);
 }

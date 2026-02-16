@@ -188,7 +188,11 @@ export function showSaveIndicator() {
 
     setTimeout(() => {
         indicator.classList.remove('saving');
-        indicator.innerHTML = '<span class="icon">✓</span><span>Saved</span>';
+        const savedAt = new Date().toLocaleTimeString([], {
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+        indicator.innerHTML = `<span class="icon">✓</span><span>Saved ${savedAt}</span>`;
     }, 500);
 }
 
