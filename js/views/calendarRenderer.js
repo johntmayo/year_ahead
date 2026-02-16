@@ -148,6 +148,16 @@ function renderDay(dateKey, day, firstDay, monthStart, monthEnd, daysInMonth) {
         eventStyle += ` left: -1px;`;
         // Remove right border for continuous flow
         eventStyle += ` border-right: none;`;
+        // Ensure visible rounded endpoints in calendar view.
+        if (isEventStart && isEventEnd) {
+            eventStyle += ` border-radius: 8px;`;
+        } else if (isEventStart || (!continuesFromPrev && isFirstRow)) {
+            eventStyle += ` border-radius: 8px 0 0 8px;`;
+        } else if (isEventEnd || (!continuesNext && span === 1)) {
+            eventStyle += ` border-radius: 0 8px 8px 0;`;
+        } else {
+            eventStyle += ` border-radius: 0;`;
+        }
         
         // Add data attributes for styling start/end
         let dataAttrs = `data-event-idx="${eventIdx}"`;

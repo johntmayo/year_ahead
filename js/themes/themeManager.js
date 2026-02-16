@@ -124,14 +124,13 @@ export function getEventColorStyle(baseColor, isHover = false, isMultiDay = fals
     const dark = `rgb(${tint(r, -18)}, ${tint(g, -18)}, ${tint(b, -18)})`;
 
     const mode = getCurrentMode();
-    const borderColor = mode === 'dark' ? 'rgba(255, 255, 255, 0.24)' : 'rgba(20, 24, 28, 0.2)';
     const shadowColor = mode === 'dark' ? 'rgba(0, 0, 0, 0.36)' : 'rgba(0, 0, 0, 0.14)';
 
     if (isMultiDay) {
         return `
             background: ${solid};
             border: none;
-            box-shadow: 0 0 0 1px ${borderColor}, 0 1px 3px ${shadowColor};
+            box-shadow: 0 1px 3px ${shadowColor};
             color: ${getContrastColor(baseColor)};
         `.trim();
     } else {
@@ -139,7 +138,7 @@ export function getEventColorStyle(baseColor, isHover = false, isMultiDay = fals
             background: linear-gradient(135deg, 
                 ${isHover ? light : solid} 0%,
                 ${isHover ? solid : dark} 100%);
-            border: 1px solid ${borderColor};
+            border: none;
             box-shadow: 0 1px 3px ${shadowColor};
             color: ${getContrastColor(baseColor)};
         `.trim();

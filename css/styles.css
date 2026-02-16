@@ -2064,9 +2064,9 @@ select:focus {
     backdrop-filter: var(--blur-soft);
     border: 1px solid var(--border-glass);
     overflow-x: auto;
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 0 !important;
     position: relative;
     align-items: flex-start;

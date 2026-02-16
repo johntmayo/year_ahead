@@ -216,6 +216,8 @@ export function renderParagraph() {
             
             // Keep each segment inside its own day cell to avoid overlap seams.
             style += ` left: 0; right: 0;`;
+            // Paragraph view should render event bars seam-free with no border artifacts.
+            style += ` border: none; box-shadow: none;`;
             
             // Add border-radius based on position in the event (more rounded for visibility)
             if (isEventStart && isEventEnd) {
@@ -301,7 +303,7 @@ export function renderParagraph() {
             style += ` ${getPressureVisualStyle(evt)}`;
             style += ` height: ${eventHeight}%;`;
             style += ` top: ${currentEventTop}%;`;
-            style += ` left: 0; right: 0; border-radius: 2px;`;
+            style += ` left: 0; right: 0; border-radius: 2px; border: none; box-shadow: none;`;
 
             eventEl.style.cssText = style;
             eventEl.textContent = evt.text;
