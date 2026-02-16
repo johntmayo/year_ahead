@@ -20,6 +20,15 @@ import {
 } from '../drag/dragManager.js';
 import { openModal } from '../ui/modal.js';
 
+function getParagraphDayWidth() {
+    const width = window.innerWidth;
+    if (width <= 480) return 30;
+    if (width <= 768) return 35;
+    if (width <= 900) return 40;
+    if (width <= 1200) return 45;
+    return 50;
+}
+
 /**
  * Render the paragraph flow view
  */
@@ -125,8 +134,9 @@ export function renderParagraph() {
     
     // Check if gridlines are hidden (used for width calculations)
     const gridlinesHidden = paragraphView && paragraphView.classList.contains('gridlines-hidden');
-    const dayWidth = 50; // Base width in pixels
+    const dayWidth = getParagraphDayWidth();
     const borderWidth = gridlinesHidden ? 0 : 0.5; // Border width when visible
+    const columnsPerRow = Math.max(1, Math.floor(paragraphView.clientWidth / dayWidth));
 
     // Render all days as direct children of paragraphView
     allDays.forEach((dayData, index) => {
@@ -244,13 +254,15 @@ export function renderParagraph() {
             const startDate = stringToDate(evt.startDate);
             const endDate = stringToDate(evt.endDate);
             const spanDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            const remainingCellsInRow = columnsPerRow - (index % columnsPerRow);
+            const spanInThisRow = Math.max(1, Math.min(spanDays, remainingCellsInRow));
             
             // Find the slot position for this event
             const localSlot = sortedDayEvents.findIndex(e => getEventIndex(e) === eventIdx);
             const currentEventTop = localSlot * eventHeight;
             
             // Calculate total width: (spanDays * dayWidth) minus borders between cells
-            const totalWidth = (spanDays * dayWidth) - ((spanDays - 1) * borderWidth);
+            const totalWidth = (spanInThisRow * dayWidth) - ((spanInThisRow - 1) * borderWidth);
             
             // Create text overlay that spans the full event width
             const textOverlay = createElement('div');

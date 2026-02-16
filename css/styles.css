@@ -2115,7 +2115,7 @@ select:focus {
     box-shadow: var(--shadow-lg);
     backdrop-filter: var(--blur-soft);
     border: 1px solid var(--border-glass);
-    overflow-x: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
