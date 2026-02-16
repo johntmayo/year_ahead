@@ -14,6 +14,7 @@ const initialState = {
     selectedDate: null,
     events: [],
     categories: {},
+    valuesDeclaration: '',
     timelineLines: 1,
     notes: '',
     drag: {

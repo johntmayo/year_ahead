@@ -24,6 +24,7 @@ import { initInstructions, toggleInstructions } from './ui/instructions.js';
 import { initTheme } from './themes/themeManager.js';
 import { renderYearString } from './ui/yearString.js';
 import { initAuthGate } from './auth/authUI.js';
+import { initValuesDeclaration, renderValuesDeclaration } from './ui/valuesDeclaration.js';
 
 /**
  * Initialize the application
@@ -40,7 +41,10 @@ async function initApp() {
         console.log('Initializing Year Ahead Planner...');
         
         // Set callback for year change to avoid circular dependency
-        setYearChangeCallback(renderCategoryKey);
+        setYearChangeCallback(() => {
+            renderCategoryKey();
+            renderValuesDeclaration();
+        });
 
         // Set year selector to current year
         const yearSelect = getById('yearSelect');
@@ -73,11 +77,13 @@ async function initApp() {
 
         // Render category key
         renderCategoryKey();
+        renderValuesDeclaration();
 
         // Initialize UI components
         initModalListeners();
         initNotepad();
         initInstructions();
+        initValuesDeclaration();
 
         // Initialize drag handlers
         initGlobalDragListeners();
@@ -160,6 +166,7 @@ function attachGlobalHandlers() {
             importData(e, () => {
                 updateYearDisplay();
                 renderCategoryKey();
+                renderValuesDeclaration();
                 refreshView();
             });
         };
@@ -214,6 +221,7 @@ window.importData = (e) => {
     importData(e, () => {
         updateYearDisplay();
         renderCategoryKey();
+        renderValuesDeclaration();
         refreshView();
     });
 };

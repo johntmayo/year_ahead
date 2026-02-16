@@ -19,7 +19,10 @@ export function addEvent(eventData) {
         text: eventData.text || 'New Event',
         color: eventData.color || store.get('selectedColor'),
         startDate: eventData.startDate,
-        endDate: eventData.endDate || eventData.startDate
+        endDate: eventData.endDate || eventData.startDate,
+        controllability: eventData.controllability || 'high',
+        anticipation: eventData.anticipation || false,
+        recovery: eventData.recovery || 'neutral'
     };
     store.addEvent(newEvent);
     saveData();
@@ -47,6 +50,45 @@ export function updateEventColor(index, color) {
     const events = store.get('events');
     if (events[index]) {
         store.updateEvent(index, { color });
+        saveData();
+    }
+}
+
+/**
+ * Update event controllability
+ * @param {number} index - Event index
+ * @param {'high' | 'low'} controllability - New controllability value
+ */
+export function updateEventControllability(index, controllability) {
+    const events = store.get('events');
+    if (events[index]) {
+        store.updateEvent(index, { controllability });
+        saveData();
+    }
+}
+
+/**
+ * Update event anticipation flag
+ * @param {number} index - Event index
+ * @param {boolean} anticipation - New anticipation value
+ */
+export function updateEventAnticipation(index, anticipation) {
+    const events = store.get('events');
+    if (events[index]) {
+        store.updateEvent(index, { anticipation: !!anticipation });
+        saveData();
+    }
+}
+
+/**
+ * Update event recovery declaration
+ * @param {number} index - Event index
+ * @param {'restorative' | 'draining' | 'neutral'} recovery - New recovery value
+ */
+export function updateEventRecovery(index, recovery) {
+    const events = store.get('events');
+    if (events[index]) {
+        store.updateEvent(index, { recovery });
         saveData();
     }
 }
@@ -138,7 +180,10 @@ export function createEventFromDrag(startDate, endDate) {
         text: 'New Event',
         color: store.get('selectedColor'),
         startDate: actualStart,
-        endDate: actualEnd
+        endDate: actualEnd,
+        controllability: 'high',
+        anticipation: false,
+        recovery: 'neutral'
     };
 
     store.addEvent(newEvent);

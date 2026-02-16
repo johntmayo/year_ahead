@@ -27,6 +27,11 @@ function normalizeEvents(data, currentYear) {
         events = data.events.filter(evt => {
             const eventYear = new Date(evt.startDate + 'T00:00:00').getFullYear();
             return eventYear === currentYear;
+        }).map(evt => ({
+            ...evt,
+            controllability: evt.controllability || 'high',
+            anticipation: !!evt.anticipation,
+            recovery: evt.recovery || 'neutral'
         });
     } else if (data.events && typeof data.events === 'object') {
         Object.keys(data.events).forEach(dateKey => {
@@ -37,7 +42,10 @@ function normalizeEvents(data, currentYear) {
                         text: evt.text,
                         color: evt.color,
                         startDate: dateKey,
-                        endDate: dateKey
+                        endDate: dateKey,
+                        controllability: evt.controllability || 'high',
+                        anticipation: !!evt.anticipation,
+                        recovery: evt.recovery || 'neutral'
                     });
                 });
             }
@@ -69,6 +77,7 @@ function applyLoadedData(data) {
         }
     });
     store.set('categories', currentCategories);
+    store.set('valuesDeclaration', data.valuesDeclaration || '');
 
     const notepadEl = getById('notepadText');
     if (notepadEl) {
@@ -87,6 +96,7 @@ function applyLoadedData(data) {
 
 function clearCurrentYearData() {
     store.setEvents([]);
+    store.set('valuesDeclaration', '');
     const notepadEl = getById('notepadText');
     if (notepadEl) {
         notepadEl.value = '';
@@ -109,6 +119,7 @@ export function saveData() {
         events: store.get('events'),
         categories: store.get('categories'),
         colors: store.get('colors'),
+        valuesDeclaration: store.get('valuesDeclaration'),
         notepadText,
         notepadCollapsed: isCollapsed
     };

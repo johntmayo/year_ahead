@@ -508,6 +508,57 @@ button:active {
 }
 
 /* ============================================
+   VALUES DECLARATION ANCHOR
+   ============================================ */
+
+.values-anchor {
+    background: var(--bg-card);
+    padding: 20px 25px;
+    margin-bottom: var(--spacing-lg);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: var(--blur-soft);
+    border: 1px solid var(--border-glass);
+}
+
+.values-anchor h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    font-family: var(--font-family-header);
+}
+
+.values-anchor textarea {
+    width: 100%;
+    min-height: 72px;
+    resize: vertical;
+    padding: 10px 12px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-md);
+    font-family: var(--font-family-body);
+    line-height: 1.5;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.values-anchor textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+[data-theme="glass-glow"] .values-anchor textarea:focus {
+    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+}
+
+.values-anchor-note {
+    margin-top: 8px;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* ============================================
    CATEGORY KEY
    ============================================ */
 
@@ -1332,6 +1383,82 @@ button:active {
     font-size: var(--font-size-sm);
     color: var(--text-muted);
     font-family: var(--font-family-mono);
+}
+
+.event-load-controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.event-load-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.event-load-controls select {
+    width: 100%;
+}
+
+.event-checkbox-label {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 8px !important;
+}
+
+.pressure-prediction {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    padding: 8px 10px;
+    background: rgba(44, 62, 80, 0.06);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+}
+
+.prediction-title {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.trust-toggle-btn {
+    width: 100%;
+    padding: 8px 12px;
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    box-shadow: none;
+    font-size: var(--font-size-sm);
+}
+
+.trust-toggle-btn:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.trust-panel {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    background: rgba(44, 62, 80, 0.04);
+}
+
+.trust-panel p {
+    margin: 0 0 8px 0;
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+.trust-panel p:last-child {
+    margin-bottom: 0;
+}
+
+.trust-panel-note {
+    color: var(--text-muted);
 }
 
 .add-event-btn {

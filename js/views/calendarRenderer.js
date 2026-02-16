@@ -16,6 +16,7 @@ import {
 } from '../utils/date.js';
 import { getEventsForDay, getEventIndex } from '../events/eventManager.js';
 import { getEventColorStyle } from '../themes/themeManager.js';
+import { getPressureVisualStyle } from '../models/pressureModel.js';
 
 /**
  * Render a calendar month
@@ -132,8 +133,10 @@ function renderDay(dateKey, day, firstDay, monthStart, monthEnd, daysInMonth) {
 
         // Use theme manager for color styling - pass isMultiDay flag for painterly style
         const colorStyle = getEventColorStyle(evt.color, false, true);
+        const pressureStyle = getPressureVisualStyle(evt);
         
         let eventStyle = colorStyle;
+        eventStyle += ` ${pressureStyle}`;
         eventStyle += ` width: calc(${span * 100}% + ${borderAdjustment}px);`;
         eventStyle += ` top: ${eventTop}px;`;
         // Extend beyond cell boundaries for seamless connection
@@ -162,8 +165,10 @@ function renderDay(dateKey, day, firstDay, monthStart, monthEnd, daysInMonth) {
     singleDayEvents.forEach((evt) => {
         const eventIdx = getEventIndex(evt);
         const colorStyle = getEventColorStyle(evt.color, false);
+        const pressureStyle = getPressureVisualStyle(evt);
         
         let eventStyle = colorStyle;
+        eventStyle += ` ${pressureStyle}`;
         eventStyle += ` position: absolute;`;
         eventStyle += ` top: ${eventTop}px;`;
         eventStyle += ` left: 0;`;
@@ -190,7 +195,8 @@ export function renderEventsHtml(events, dateKey) {
     events.forEach((evt) => {
         const eventIdx = getEventIndex(evt);
         const colorStyle = getEventColorStyle(evt.color, false);
-        html += `<div class="event" data-event-idx="${eventIdx}" style="${colorStyle}">${escapeHtml(evt.text)}</div>`;
+        const pressureStyle = getPressureVisualStyle(evt);
+        html += `<div class="event" data-event-idx="${eventIdx}" style="${colorStyle} ${pressureStyle}">${escapeHtml(evt.text)}</div>`;
     });
 
     return html;

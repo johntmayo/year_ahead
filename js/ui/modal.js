@@ -14,9 +14,17 @@ import {
     updateEventColor,
     updateEventStartDate,
     updateEventEndDate,
+    updateEventControllability,
+    updateEventAnticipation,
+    updateEventRecovery,
     deleteEvent,
     getEventsForDay
 } from '../events/eventManager.js';
+import {
+    estimateEventPressure,
+    predictPressureChange,
+    formatPrediction
+} from '../models/pressureModel.js';
 
 /**
  * Open the modal for a specific date
@@ -72,6 +80,12 @@ export function renderEventList() {
     let html = '';
     dayEvents.forEach((evt) => {
         const eventIdx = events.indexOf(evt);
+        const pressureEstimate = estimateEventPressure(evt);
+        const prediction = predictPressureChange(
+            evt,
+            evt.controllability || 'high',
+            !!evt.anticipation
+        );
         html += `<div class="event-item">`;
         html += `<div class="event-item-row">`;
         html += `<input type="text" value="${escapeAttr(evt.text)}" placeholder="Event name" data-event-idx="${eventIdx}" data-field="text">`;
@@ -89,6 +103,37 @@ export function renderEventList() {
         html += `<label>Start: <input type="date" value="${escapeAttr(evt.startDate)}" data-event-idx="${eventIdx}" data-field="startDate"></label>`;
         html += `<label>End: <input type="date" value="${escapeAttr(evt.endDate)}" data-event-idx="${eventIdx}" data-field="endDate"></label>`;
         html += `</div>`;
+        html += `<div class="event-load-controls">`;
+        html += `<label>Controllability
+            <select data-event-idx="${eventIdx}" data-field="controllability">
+                <option value="high" ${(evt.controllability || 'high') === 'high' ? 'selected' : ''}>High control</option>
+                <option value="low" ${(evt.controllability || 'high') === 'low' ? 'selected' : ''}>Low control</option>
+            </select>
+        </label>`;
+        html += `<label class="event-checkbox-label">
+            <input type="checkbox" ${(evt.anticipation ? 'checked' : '')} data-event-idx="${eventIdx}" data-field="anticipation">
+            Weighs on me beforehand
+        </label>`;
+        html += `<label>Recovery declaration
+            <select data-event-idx="${eventIdx}" data-field="recovery">
+                <option value="neutral" ${(evt.recovery || 'neutral') === 'neutral' ? 'selected' : ''}>Neutral / depends</option>
+                <option value="restorative" ${(evt.recovery || 'neutral') === 'restorative' ? 'selected' : ''}>Restorative for me</option>
+                <option value="draining" ${(evt.recovery || 'neutral') === 'draining' ? 'selected' : ''}>Draining for me</option>
+            </select>
+        </label>`;
+        html += `</div>`;
+        html += `<div class="pressure-prediction" data-event-idx="${eventIdx}" data-role="pressurePrediction">
+            <span class="prediction-title">Predicted effect:</span> ${escapeHtml(formatPrediction(prediction))}
+        </div>`;
+        html += `<button class="trust-toggle-btn" type="button" data-action="toggle-trust" data-event-idx="${eventIdx}" aria-expanded="false">
+            How pressure is estimated
+        </button>`;
+        html += `<div class="trust-panel" data-event-idx="${eventIdx}" data-role="trustPanel" hidden>
+            <p><strong>Weighting:</strong> duration ${Math.round(pressureEstimate.weights.duration * 100)}%, controllability ${Math.round(pressureEstimate.weights.controllability * 100)}%, anticipation ${Math.round(pressureEstimate.weights.anticipation * 100)}%.</p>
+            <p><strong>This event now:</strong> duration ${(pressureEstimate.components.duration * 100).toFixed(0)}%, controllability ${(pressureEstimate.components.controllability * 100).toFixed(0)}%, anticipation ${(pressureEstimate.components.anticipation * 100).toFixed(0)}%.</p>
+            <p class="trust-panel-note">Structural estimate only. It does not infer causes. Your judgment is primary.</p>
+            <p class="trust-panel-note">Open space doesn't automatically mean recovery.</p>
+        </div>`;
         html += `</div>`;
     });
 
@@ -152,6 +197,53 @@ function attachModalEventHandlers() {
             updateEventColor(idx, color);
             renderEventList();
             refreshView();
+        };
+    });
+
+    // Controllability changes
+    eventList.querySelectorAll('select[data-field="controllability"]').forEach(select => {
+        select.onchange = (e) => {
+            const idx = parseInt(e.target.dataset.eventIdx);
+            updateEventControllability(idx, e.target.value);
+            renderEventList();
+            refreshView();
+        };
+    });
+
+    // Anticipation changes
+    eventList.querySelectorAll('input[data-field="anticipation"]').forEach(input => {
+        input.onchange = (e) => {
+            const idx = parseInt(e.target.dataset.eventIdx);
+            updateEventAnticipation(idx, !!e.target.checked);
+            renderEventList();
+            refreshView();
+        };
+    });
+
+    // Recovery declaration changes
+    eventList.querySelectorAll('select[data-field="recovery"]').forEach(select => {
+        select.onchange = (e) => {
+            const idx = parseInt(e.target.dataset.eventIdx);
+            updateEventRecovery(idx, e.target.value);
+            renderEventList();
+            refreshView();
+        };
+    });
+
+    // Trust panel progressive disclosure
+    eventList.querySelectorAll('[data-action="toggle-trust"]').forEach(button => {
+        button.onclick = (e) => {
+            const idx = e.target.dataset.eventIdx;
+            const panel = eventList.querySelector(`[data-role="trustPanel"][data-event-idx="${idx}"]`);
+            if (!panel) return;
+            const isHidden = panel.hasAttribute('hidden');
+            if (isHidden) {
+                panel.removeAttribute('hidden');
+                e.target.setAttribute('aria-expanded', 'true');
+            } else {
+                panel.setAttribute('hidden', '');
+                e.target.setAttribute('aria-expanded', 'false');
+            }
         };
     });
 }

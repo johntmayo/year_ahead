@@ -10,6 +10,7 @@ import { getEventIndex } from '../events/eventManager.js';
 import { getEventColorStyle } from '../themes/themeManager.js';
 import { stringToDate, dateToString, isDateInRange } from '../utils/date.js';
 import { escapeHtml, escapeAttr } from '../utils/sanitize.js';
+import { getPressureVisualStyle } from '../models/pressureModel.js';
 import {
     handleDayMouseDown,
     handleDayMouseEnter,
@@ -205,6 +206,7 @@ export function renderParagraph() {
             
             // Apply styling - each piece fills its day cell
             let style = colorStyle;
+            style += ` ${getPressureVisualStyle(evt)}`;
             style += ` height: ${eventHeight}%;`;
             style += ` top: ${currentEventTop}%;`;
             
@@ -311,6 +313,7 @@ export function renderParagraph() {
 
             // Apply styling
             let style = colorStyle;
+            style += ` ${getPressureVisualStyle(evt)}`;
             style += ` height: ${eventHeight}%;`;
             style += ` top: ${currentEventTop}%;`;
             style += ` left: 0; right: 0; border-radius: 2px;`;

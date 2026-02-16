@@ -16,6 +16,7 @@ import { getById, createElement, addClass, removeClass, clearChildren } from '..
 import { getEventsForDay, getEventIndex } from '../events/eventManager.js';
 import { attachDayEventHandlers, attachEventHandlers } from './viewController.js';
 import { getEventColorStyle } from '../themes/themeManager.js';
+import { getPressureVisualStyle } from '../models/pressureModel.js';
 
 /**
  * Parse inline style string into object
@@ -193,11 +194,13 @@ function createTimelineDay(dateKey, lineStart, lineEnd) {
         const width = span * TIMELINE_DAY_WIDTH - 1;
 
         const colorStyle = getEventColorStyle(evt.color, false);
+        const pressureStyle = parseInlineStyles(getPressureVisualStyle(evt));
         const eventDiv = createElement('div', {
             className: 'timeline-event timeline-multi-day',
             dataset: { eventIdx: eventIdx.toString() },
             style: {
                 ...parseInlineStyles(colorStyle),
+                ...pressureStyle,
                 width: `${width}px`,
                 position: 'absolute',
                 top: `${eventTop}px`,
@@ -215,11 +218,13 @@ function createTimelineDay(dateKey, lineStart, lineEnd) {
         const eventIdx = getEventIndex(evt);
 
         const colorStyle = getEventColorStyle(evt.color, false);
+        const pressureStyle = parseInlineStyles(getPressureVisualStyle(evt));
         const eventDiv = createElement('div', {
             className: 'timeline-event',
             dataset: { eventIdx: eventIdx.toString() },
             style: {
                 ...parseInlineStyles(colorStyle),
+                ...pressureStyle,
                 position: 'absolute',
                 top: `${eventTop}px`,
                 left: '0'
