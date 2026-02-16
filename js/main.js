@@ -23,11 +23,19 @@ import { initNotepad } from './ui/notepad.js';
 import { initInstructions } from './ui/instructions.js';
 import { initTheme } from './themes/themeManager.js';
 import { renderYearString } from './ui/yearString.js';
+import { initAuthGate } from './auth/authUI.js';
 
 /**
  * Initialize the application
  */
-function init() {
+let appInitialized = false;
+
+async function initApp() {
+    if (appInitialized) {
+        return;
+    }
+    appInitialized = true;
+
     try {
         console.log('Initializing Year Ahead Planner...');
         
@@ -46,10 +54,7 @@ function init() {
         updateYearDisplay();
 
         // Load saved data
-        loadData();
-
-        // Initialize theme system
-        initTheme();
+        await loadData();
 
         // Render initial view
         console.log('Rendering year view...');
@@ -87,6 +92,17 @@ function init() {
     } catch (error) {
         console.error('Error during initialization:', error);
         alert('Error initializing application. Check console for details.');
+    }
+}
+
+async function init() {
+    try {
+        // Theme is safe to initialize before auth/app boot.
+        initTheme();
+        await initAuthGate(initApp);
+    } catch (error) {
+        console.error('Error during auth initialization:', error);
+        alert('Error initializing authentication. Check console for details.');
     }
 }
 

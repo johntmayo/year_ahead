@@ -110,7 +110,7 @@ export function setYearChangeCallback(callback) {
 /**
  * Change the current year
  */
-export function changeYear() {
+export async function changeYear() {
     // Save current year's data before switching
     saveData();
 
@@ -124,7 +124,7 @@ export function changeYear() {
     updateYearDisplay();
 
     // Load new year's data
-    loadData();
+    await loadData();
 
     // Refresh view
     refreshView();

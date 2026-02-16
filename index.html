@@ -12,6 +12,24 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <div class="auth-gate" id="authGate" style="display: none;">
+        <div class="auth-card">
+            <h2>Sign in to Year Ahead</h2>
+            <p class="auth-subtitle">Create an account once, then your planner data follows you when you log back in.</p>
+            <p class="auth-setup-note" id="authSetupNote"></p>
+            <label for="authEmail">Email</label>
+            <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email">
+            <label for="authPassword">Password</label>
+            <input id="authPassword" type="password" placeholder="At least 6 characters" autocomplete="current-password">
+            <div class="auth-actions">
+                <button id="signInBtn" class="auth-btn primary">Sign In</button>
+                <button id="signUpBtn" class="auth-btn secondary">Create Account</button>
+            </div>
+            <p class="auth-message" id="authMessage"></p>
+        </div>
+    </div>
+
+    <div id="appShell" style="display: none;">
     <div class="header">
         <div class="header-top">
             <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
@@ -27,6 +45,8 @@
                     <button class="data-btn export-btn">Export Data</button>
                     <button class="data-btn import-btn">Import Data</button>
                     <input type="file" id="importFile" accept=".json">
+                    <span class="auth-user-badge" id="authUserBadge" style="display: none;"></span>
+                    <button class="data-btn signout-btn" id="signOutBtn" style="display: none;">Sign Out</button>
                 </div>
             </div>
             <div class="controls">
@@ -110,10 +130,10 @@
                     <li><strong>Edit Events:</strong> Click any day or event to open the editor</li>
                     <li><strong>Customize Colors:</strong> Use the color pickers in Category Key to customize event colors</li>
                     <li><strong>Multi-Day Events:</strong> Events can span multiple days - set start and end dates in the editor</li>
-                    <li><strong>Auto-Save:</strong> All changes save automatically to your browser's local storage</li>
+                    <li><strong>Auto-Save:</strong> All changes save automatically (cloud when signed in, local fallback otherwise)</li>
                     <li><strong>Export Data:</strong> Click "Export Data" to download a backup file with ALL years' data (saves to your computer)</li>
                     <li><strong>Import Data:</strong> Click "Import Data" to restore from a backup file</li>
-                    <li><strong>Important:</strong> Data is stored locally in your browser. Clear browser data = lose your calendar. Always export backups!</li>
+                    <li><strong>Important:</strong> Export backups regularly for safety, even when cloud sync is enabled.</li>
                 </ul>
             </div>
         </div>
@@ -150,5 +170,6 @@
             }
         });
     </script>
+    </div>
 </body>
 </html>

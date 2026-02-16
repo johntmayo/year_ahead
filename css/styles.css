@@ -143,6 +143,98 @@ body {
 }
 
 /* ============================================
+   AUTH GATE
+   ============================================ */
+
+.auth-gate {
+    min-height: calc(100vh - 40px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: var(--blur-soft);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.auth-card h2 {
+    font-family: var(--font-family-header);
+    color: var(--text-primary);
+}
+
+.auth-subtitle {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: 6px;
+}
+
+.auth-card label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.auth-card input {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.auth-card input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.auth-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.auth-btn {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: var(--font-size-sm);
+}
+
+.auth-btn.primary {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: white;
+}
+
+.auth-btn.secondary {
+    background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+    color: white;
+}
+
+.auth-message {
+    min-height: 20px;
+    font-size: var(--font-size-sm);
+    color: var(--color-success);
+}
+
+.auth-message.error {
+    color: var(--color-danger);
+}
+
+.auth-setup-note {
+    min-height: 18px;
+    font-size: var(--font-size-sm);
+    color: var(--color-warning);
+}
+
+/* ============================================
    HEADER & TYPOGRAPHY
    ============================================ */
 
@@ -299,6 +391,7 @@ button:active {
     display: flex;
     gap: 10px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .data-btn {
@@ -314,6 +407,22 @@ button:active {
 .import-btn {
     background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
     color: white;
+}
+
+.signout-btn {
+    background: linear-gradient(135deg, var(--text-secondary) 0%, #475569 100%);
+    color: white;
+}
+
+.auth-user-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
 }
 
 #importFile {

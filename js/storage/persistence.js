@@ -5,6 +5,11 @@
 import { store } from '../store.js';
 import { STORAGE_KEY_PREFIX, AVAILABLE_YEARS } from '../constants.js';
 import { getById } from '../utils/dom.js';
+import {
+    isSupabaseEnabled,
+    loadYearDataFromCloud,
+    saveYearDataToCloud
+} from '../services/supabaseService.js';
 
 /**
  * Get storage key for a year
@@ -13,6 +18,83 @@ import { getById } from '../utils/dom.js';
  */
 function getStorageKey(year) {
     return `${STORAGE_KEY_PREFIX}${year}`;
+}
+
+function normalizeEvents(data, currentYear) {
+    let events = [];
+
+    if (Array.isArray(data.events)) {
+        events = data.events.filter(evt => {
+            const eventYear = new Date(evt.startDate + 'T00:00:00').getFullYear();
+            return eventYear === currentYear;
+        });
+    } else if (data.events && typeof data.events === 'object') {
+        Object.keys(data.events).forEach(dateKey => {
+            const eventYear = new Date(dateKey + 'T00:00:00').getFullYear();
+            if (eventYear === currentYear) {
+                data.events[dateKey].forEach(evt => {
+                    events.push({
+                        text: evt.text,
+                        color: evt.color,
+                        startDate: dateKey,
+                        endDate: dateKey
+                    });
+                });
+            }
+        });
+    }
+
+    return events;
+}
+
+function applyLoadedData(data) {
+    const currentYear = store.get('currentYear');
+
+    const events = normalizeEvents(data, currentYear);
+    store.setEvents(events);
+
+    const categories = data.categories || {};
+    store.set('categories', categories);
+
+    const colors = store.get('colors');
+    if (data.colors && Array.isArray(data.colors) && data.colors.length === colors.length) {
+        store.set('colors', data.colors);
+    }
+
+    const currentColors = store.get('colors');
+    const currentCategories = store.get('categories');
+    currentColors.forEach(color => {
+        if (!currentCategories[color]) {
+            currentCategories[color] = '';
+        }
+    });
+    store.set('categories', currentCategories);
+
+    const notepadEl = getById('notepadText');
+    if (notepadEl) {
+        notepadEl.value = data.notepadText || '';
+    }
+
+    const notepad = getById('notepad');
+    if (notepad) {
+        if (data.notepadCollapsed === true) {
+            notepad.classList.add('collapsed');
+        } else {
+            notepad.classList.remove('collapsed');
+        }
+    }
+}
+
+function clearCurrentYearData() {
+    store.setEvents([]);
+    const notepadEl = getById('notepadText');
+    if (notepadEl) {
+        notepadEl.value = '';
+    }
+    const notepad = getById('notepad');
+    if (notepad) {
+        notepad.classList.remove('collapsed');
+    }
 }
 
 /**
@@ -31,94 +113,54 @@ export function saveData() {
         notepadCollapsed: isCollapsed
     };
 
-    localStorage.setItem(getStorageKey(store.get('currentYear')), JSON.stringify(data));
+    const currentYear = store.get('currentYear');
+    localStorage.setItem(getStorageKey(currentYear), JSON.stringify(data));
+
+    // Fire-and-forget cloud save. localStorage remains a fallback backup.
+    isSupabaseEnabled()
+        .then(enabled => {
+            if (!enabled) return false;
+            return saveYearDataToCloud(currentYear, data);
+        })
+        .catch(error => {
+            console.warn('Cloud save skipped:', error);
+        });
+
     showSaveIndicator();
 }
 
 /**
  * Load data from localStorage for current year
  */
-export function loadData() {
+export async function loadData() {
     const currentYear = store.get('currentYear');
-    const saved = localStorage.getItem(getStorageKey(currentYear));
+    let data = null;
 
-    if (saved) {
-        const data = JSON.parse(saved);
-
-        // Handle migration from old format (object) to new format (array)
-        let events = [];
-        if (Array.isArray(data.events)) {
-            // Filter events to only include those for the current year
-            events = data.events.filter(evt => {
-                const eventYear = new Date(evt.startDate + 'T00:00:00').getFullYear();
-                return eventYear === currentYear;
-            });
-        } else if (data.events && typeof data.events === 'object') {
-            // Migrate old format to new format
-            Object.keys(data.events).forEach(dateKey => {
-                const eventYear = new Date(dateKey + 'T00:00:00').getFullYear();
-                if (eventYear === currentYear) {
-                    data.events[dateKey].forEach(evt => {
-                        events.push({
-                            text: evt.text,
-                            color: evt.color,
-                            startDate: dateKey,
-                            endDate: dateKey
-                        });
-                    });
-                }
-            });
-        }
-
-        store.setEvents(events);
-
-        // Load categories
-        const categories = data.categories || {};
-        store.set('categories', categories);
-
-        // Load custom colors if saved
-        const colors = store.get('colors');
-        if (data.colors && Array.isArray(data.colors) && data.colors.length === colors.length) {
-            store.set('colors', data.colors);
-        }
-
-        // Ensure categories exist for all colors
-        const currentColors = store.get('colors');
-        const currentCategories = store.get('categories');
-        currentColors.forEach(color => {
-            if (!currentCategories[color]) {
-                currentCategories[color] = '';
-            }
-        });
-        store.set('categories', currentCategories);
-
-        // Load notepad text
-        const notepadEl = getById('notepadText');
-        if (notepadEl) {
-            notepadEl.value = data.notepadText || '';
-        }
-
-        // Load notepad collapsed state
-        const notepad = getById('notepad');
-        if (notepad) {
-            if (data.notepadCollapsed === true) {
-                notepad.classList.add('collapsed');
-            } else {
-                notepad.classList.remove('collapsed');
+    try {
+        if (await isSupabaseEnabled()) {
+            data = await loadYearDataFromCloud(currentYear);
+            // Keep local backup in sync for offline fallback and exports.
+            if (data) {
+                localStorage.setItem(getStorageKey(currentYear), JSON.stringify(data));
             }
         }
-    } else {
-        // No saved data for this year - clear everything
-        store.setEvents([]);
-        const notepadEl = getById('notepadText');
-        if (notepadEl) {
-            notepadEl.value = '';
-        }
-        const notepad = getById('notepad');
-        if (notepad) {
-            notepad.classList.remove('collapsed');
+    } catch (error) {
+        console.warn('Cloud load failed, falling back to local data.', error);
+    }
+
+    if (!data) {
+        const saved = localStorage.getItem(getStorageKey(currentYear));
+        if (saved) {
+            data = JSON.parse(saved);
         }
     }
+
+    if (data) {
+        applyLoadedData(data);
+        return;
+    }
+
+    clearCurrentYearData();
 }
 
 /**
@@ -131,6 +173,7 @@ export function saveNotepadState(isCollapsed) {
     const data = saved ? JSON.parse(saved) : {};
     data.notepadCollapsed = isCollapsed;
     localStorage.setItem(getStorageKey(currentYear), JSON.stringify(data));
+    saveData();
 }
 
 /**
@@ -215,7 +258,7 @@ export function importData(event, onComplete) {
     }
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const data = JSON.parse(e.target.result);
 
@@ -237,7 +280,7 @@ export function importData(event, onComplete) {
                 }
 
                 // Load current year's data
-                loadData();
+                await loadData();
             } else if (data.events && data.colors) {
                 // Old format: single year backup
                 const importYear = data.year || store.get('currentYear');
@@ -256,7 +299,7 @@ export function importData(event, onComplete) {
                 localStorage.setItem(getStorageKey(importYear), JSON.stringify(data));
 
                 // Load current year's data
-                loadData();
+                await loadData();
             } else {
                 alert('Invalid file format. Please select a valid backup file.');
                 event.target.value = '';
