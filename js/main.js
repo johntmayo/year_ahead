@@ -25,6 +25,9 @@ import { initTheme } from './themes/themeManager.js';
 import { renderYearString } from './ui/yearString.js';
 import { initAuthGate } from './auth/authUI.js';
 import { initValuesDeclaration, renderValuesDeclaration } from './ui/valuesDeclaration.js';
+import { renderInsightStrip } from './ui/insightStrip.js';
+import { initSettingsMenu } from './ui/settingsMenu.js';
+import { initTemporalPanel, renderTemporalPanel } from './ui/temporalPanel.js';
 
 /**
  * Initialize the application
@@ -44,6 +47,7 @@ async function initApp() {
         setYearChangeCallback(() => {
             renderCategoryKey();
             renderValuesDeclaration();
+            renderInsightStrip();
         });
 
         // Set year selector to current year
@@ -78,12 +82,27 @@ async function initApp() {
         // Render category key
         renderCategoryKey();
         renderValuesDeclaration();
+        renderInsightStrip();
+        renderTemporalPanel();
 
         // Initialize UI components
         initModalListeners();
         initNotepad();
         initInstructions();
         initValuesDeclaration();
+        initSettingsMenu();
+        initTemporalPanel();
+
+        // Keep year readout current as users edit inputs.
+        const refreshInsights = () => renderInsightStrip();
+        const refreshTemporalPanel = () => renderTemporalPanel();
+        store.subscribe('events', refreshInsights);
+        store.subscribe('categories', refreshInsights);
+        store.subscribe('valuesDeclaration', refreshInsights);
+        store.subscribe('currentYear', refreshInsights);
+        store.subscribe('events', refreshTemporalPanel);
+        store.subscribe('currentYear', refreshTemporalPanel);
+        store.subscribe('countdownTarget', refreshTemporalPanel);
 
         // Initialize drag handlers
         initGlobalDragListeners();
@@ -167,6 +186,8 @@ function attachGlobalHandlers() {
                 updateYearDisplay();
                 renderCategoryKey();
                 renderValuesDeclaration();
+                renderInsightStrip();
+                renderTemporalPanel();
                 refreshView();
             });
         };
@@ -222,6 +243,8 @@ window.importData = (e) => {
         updateYearDisplay();
         renderCategoryKey();
         renderValuesDeclaration();
+        renderInsightStrip();
+        renderTemporalPanel();
         refreshView();
     });
 };

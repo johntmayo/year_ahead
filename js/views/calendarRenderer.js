@@ -71,8 +71,13 @@ export function renderCalendar(month, year, container, handlers) {
 function renderDay(dateKey, day, firstDay, monthStart, monthEnd, daysInMonth) {
     const dayEvents = getEventsForDay(dateKey);
     const currentRow = getRowForDay(day, firstDay);
+    const now = new Date();
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const isToday = dateKey === todayKey;
+    const isPast = dateKey < todayKey;
+    const dayClass = `day${isPast ? ' past-day' : ''}${isToday ? ' today-day' : ''}`;
 
-    let html = `<div class="day" data-date="${escapeAttr(dateKey)}">`;
+    let html = `<div class="${dayClass}" data-date="${escapeAttr(dateKey)}">`;
     html += `<div class="day-number">${day}</div>`;
     html += `<div class="day-events">`;
 

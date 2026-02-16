@@ -78,6 +78,7 @@ function applyLoadedData(data) {
     });
     store.set('categories', currentCategories);
     store.set('valuesDeclaration', data.valuesDeclaration || '');
+    store.set('countdownTarget', data.countdownTarget || '');
 
     const notepadEl = getById('notepadText');
     if (notepadEl) {
@@ -97,6 +98,7 @@ function applyLoadedData(data) {
 function clearCurrentYearData() {
     store.setEvents([]);
     store.set('valuesDeclaration', '');
+    store.set('countdownTarget', '');
     const notepadEl = getById('notepadText');
     if (notepadEl) {
         notepadEl.value = '';
@@ -120,6 +122,7 @@ export function saveData() {
         categories: store.get('categories'),
         colors: store.get('colors'),
         valuesDeclaration: store.get('valuesDeclaration'),
+        countdownTarget: store.get('countdownTarget'),
         notepadText,
         notepadCollapsed: isCollapsed
     };

@@ -32,40 +32,45 @@
     <div id="appShell" style="display: none;">
     <div class="header">
         <div class="header-top">
-            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <div class="header-brand">
                 <div>
                     <h1>Year Ahead <span id="currentYearDisplay"></span></h1>
-                    <div class="tagline">A simple visual planner for your year ahead</div>
-                    <span class="save-indicator" id="saveIndicator">
-                        <span class="icon">✓</span>
-                        <span>Saved</span>
-                    </span>
+                    <div class="tagline">See the shape of your year.</div>
                 </div>
-                <div class="data-controls">
-                    <button class="data-btn export-btn">Export Data</button>
-                    <button class="data-btn import-btn">Import Data</button>
-                    <input type="file" id="importFile" accept=".json">
-                    <span class="auth-user-badge" id="authUserBadge" style="display: none;"></span>
-                    <button class="data-btn signout-btn" id="signOutBtn" style="display: none;">Sign Out</button>
-                </div>
+                <span class="save-indicator" id="saveIndicator">
+                    <span class="icon">✓</span>
+                    <span>Saved</span>
+                </span>
             </div>
             <div class="controls">
-                <div class="theme-toggle" id="themeToggle">
-                    <button class="theme-btn active" data-mode="light" title="Light Mode">
-                        <span class="theme-icon">☀️</span>
-                        <span class="theme-label">Light</span>
-                    </button>
-                    <button class="theme-btn" data-mode="dark" title="Dark Mode">
-                        <span class="theme-icon">🌙</span>
-                        <span class="theme-label">Dark</span>
-                    </button>
-                </div>
                 <div class="view-toggle" id="viewToggle">
                     <div class="view-toggle-slider" id="viewToggleSlider"></div>
                     <button class="view-toggle-option active" data-view="year">Calendar Year</button>
                     <button class="view-toggle-option" data-view="timeline">Timeline Year</button>
                     <button class="view-toggle-option" data-view="month">Single Month</button>
                     <button class="view-toggle-option" data-view="paragraph">Paragraph</button>
+                </div>
+                <div class="settings-menu-wrapper">
+                    <button class="data-btn settings-btn" id="settingsMenuButton" aria-expanded="false" aria-controls="settingsMenu">Settings</button>
+                    <div class="settings-menu" id="settingsMenu" hidden>
+                        <span class="auth-user-badge" id="authUserBadge" style="display: none;"></span>
+                        <div class="theme-toggle" id="themeToggle">
+                            <button class="theme-btn active" data-mode="light" title="Light Mode">
+                                <span class="theme-icon">☀️</span>
+                                <span class="theme-label">Light</span>
+                            </button>
+                            <button class="theme-btn" data-mode="dark" title="Dark Mode">
+                                <span class="theme-icon">🌙</span>
+                                <span class="theme-label">Dark</span>
+                            </button>
+                        </div>
+                        <div class="data-controls">
+                            <button class="data-btn export-btn">Export Data</button>
+                            <button class="data-btn import-btn">Import Data</button>
+                            <input type="file" id="importFile" accept=".json">
+                            <button class="data-btn signout-btn" id="signOutBtn" style="display: none;">Sign Out</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -97,6 +102,7 @@
                 <option value="4">4 Lines (Quarter)</option>
             </select>
         </div>
+        <div class="temporal-panel" id="temporalPanel"></div>
     </div>
 
     <div class="year-string-container" id="yearStringContainer" style="display: none;">
@@ -113,6 +119,8 @@
             aria-label="What matters most this year?"></textarea>
         <p class="values-anchor-note">Optional reflection anchor. This does not score or grade your year.</p>
     </div>
+
+    <div class="insight-strip" id="insightStrip"></div>
 
     <div class="category-key">
         <h3>Personal Category Key</h3>

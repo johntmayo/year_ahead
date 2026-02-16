@@ -152,9 +152,14 @@ export function renderTimeline() {
 function createTimelineDay(dateKey, lineStart, lineEnd) {
     const date = stringToDate(dateKey);
     const dayEvents = getEventsForDay(dateKey);
+    const now = new Date();
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const isToday = dateKey === todayKey;
+    const isPast = dateKey < todayKey;
+    const dayClassName = `timeline-day${isPast ? ' past-day' : ''}${isToday ? ' today-day' : ''}`;
 
     const dayDiv = createElement('div', {
-        className: 'timeline-day',
+        className: dayClassName,
         dataset: { date: dateKey }
     });
 

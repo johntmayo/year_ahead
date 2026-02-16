@@ -130,8 +130,12 @@ export function renderParagraph() {
 
     // Render all days as direct children of paragraphView
     allDays.forEach((dayData, index) => {
+        const now = new Date();
+        const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const isToday = dayData.dateKey === todayKey;
+        const isPast = dayData.dateKey < todayKey;
         const dayCell = createElement('div');
-        dayCell.className = 'paragraph-day';
+        dayCell.className = `paragraph-day${isPast ? ' past-day' : ''}${isToday ? ' today-day' : ''}`;
         dayCell.dataset.date = dayData.dateKey;
         
         // Mark first day of month for styling
@@ -210,27 +214,8 @@ export function renderParagraph() {
             style += ` height: ${eventHeight}%;`;
             style += ` top: ${currentEventTop}%;`;
             
-            // When gridlines are visible, extend events slightly to cover borders
-            // When gridlines are hidden, events should touch exactly
-            if (!gridlinesHidden) {
-                // Extend to cover borders between cells
-                if (isEventStart && !isEventEnd) {
-                    // Start of event - extend right to cover border
-                    style += ` left: 0; right: -0.5px;`;
-                } else if (!isEventStart && isEventEnd) {
-                    // End of event - extend left to cover border
-                    style += ` left: -0.5px; right: 0;`;
-                } else if (!isEventStart && !isEventEnd) {
-                    // Middle of event - extend both sides to cover borders
-                    style += ` left: -0.5px; right: -0.5px;`;
-                } else {
-                    // Single day or both start and end
-                    style += ` left: 0; right: 0;`;
-                }
-            } else {
-                // Gridlines hidden - events touch exactly
-                style += ` left: 0; right: 0;`;
-            }
+            // Keep each segment inside its own day cell to avoid overlap seams.
+            style += ` left: 0; right: 0;`;
             
             // Add border-radius based on position in the event (more rounded for visibility)
             if (isEventStart && isEventEnd) {

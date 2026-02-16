@@ -15,6 +15,7 @@ const initialState = {
     events: [],
     categories: {},
     valuesDeclaration: '',
+    countdownTarget: '',
     timelineLines: 1,
     notes: '',
     drag: {
