@@ -29,6 +29,127 @@ function getParagraphDayWidth() {
     return 50;
 }
 
+function calculateTrackMetrics(dayEvents, eventSlotMap) {
+    if (!dayEvents.length) {
+        return { trackCount: 1, eventHeight: 100 };
+    }
+
+    const maxSlot = dayEvents.reduce((max, evt) => {
+        const eventIdx = getEventIndex(evt);
+        const slot = eventSlotMap.get(eventIdx) ?? 0;
+        return Math.max(max, slot);
+    }, 0);
+
+    const trackCount = maxSlot + 1;
+    return { trackCount, eventHeight: 100 / trackCount };
+}
+
+function assignStableEventSlots(events) {
+    const slotsEndDate = [];
+    const eventSlotMap = new Map();
+
+    const sortedEvents = events
+        .map((evt, idx) => ({ evt, idx }))
+        .sort((a, b) => {
+            if (a.evt.startDate !== b.evt.startDate) {
+                return a.evt.startDate.localeCompare(b.evt.startDate);
+            }
+            return a.evt.endDate.localeCompare(b.evt.endDate);
+        });
+
+    sortedEvents.forEach(({ evt, idx }) => {
+        let assignedSlot = -1;
+        for (let slot = 0; slot < slotsEndDate.length; slot++) {
+            // Slot can be reused if previous event ended before this one starts.
+            if (slotsEndDate[slot] < evt.startDate) {
+                assignedSlot = slot;
+                break;
+            }
+        }
+
+        if (assignedSlot === -1) {
+            assignedSlot = slotsEndDate.length;
+            slotsEndDate.push(evt.endDate);
+        } else {
+            slotsEndDate[assignedSlot] = evt.endDate;
+        }
+
+        eventSlotMap.set(idx, assignedSlot);
+    });
+
+    return eventSlotMap;
+}
+
+function renderParagraphTextOverlays(
+    allDays,
+    eventsByStartDate,
+    eventSlotMap,
+    eventsContainerByDate,
+    dayWidth,
+    borderWidth,
+    columnsPerRow
+) {
+    const dayIndexByDate = new Map(allDays.map((day, idx) => [day.dateKey, idx]));
+
+    eventsByStartDate.forEach((startingEvents, startDateKey) => {
+        const startIndex = dayIndexByDate.get(startDateKey);
+        if (startIndex === undefined) return;
+
+        startingEvents.forEach((evt) => {
+            const eventIdx = getEventIndex(evt);
+            const slot = eventSlotMap.get(eventIdx) ?? 0;
+            const startDate = stringToDate(evt.startDate);
+            const endDate = stringToDate(evt.endDate);
+            let remainingDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            let segmentStartIndex = startIndex;
+
+            while (remainingDays > 0 && segmentStartIndex < allDays.length) {
+                const rowOffset = segmentStartIndex % columnsPerRow;
+                const segmentDays = Math.max(1, Math.min(remainingDays, columnsPerRow - rowOffset));
+                const segmentDay = allDays[segmentStartIndex];
+                const container = eventsContainerByDate.get(segmentDay.dateKey);
+                if (!container) break;
+
+                const dayEvents = getEventsForDay(segmentDay.dateKey);
+                const { eventHeight } = calculateTrackMetrics(dayEvents, eventSlotMap);
+                const top = slot * eventHeight;
+                const width = (segmentDays * dayWidth) - ((segmentDays - 1) * borderWidth);
+
+                const textOverlay = createElement('div');
+                textOverlay.className = 'paragraph-event-text-overlay';
+                textOverlay.textContent = evt.text;
+                textOverlay.dataset.eventIdx = eventIdx;
+                textOverlay.title = escapeAttr(evt.text);
+                textOverlay.style.cssText = `
+                    position: absolute;
+                    top: ${top}%;
+                    left: 0;
+                    width: ${width}px;
+                    height: ${eventHeight}%;
+                    display: flex;
+                    align-items: center;
+                    padding: 2px 4px;
+                    pointer-events: none;
+                    z-index: 10;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    box-sizing: border-box;
+                    font-size: clamp(7px, 1vw, 9px);
+                    font-weight: 500;
+                    font-family: var(--font-family-mono);
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
+                `;
+                container.appendChild(textOverlay);
+
+                remainingDays -= segmentDays;
+                segmentStartIndex += segmentDays;
+            }
+        });
+    });
+}
+
 /**
  * Render the paragraph flow view
  */
@@ -97,26 +218,8 @@ export function renderParagraph() {
         }
     }
 
-    // First pass: Build event slot assignment map
-    // We need to assign each event a consistent vertical slot across all days
-    // Slots are assigned based on when events first appear (start date)
     const events = store.get('events');
-    const eventSlotMap = new Map(); // Maps event index to slot number
-    const eventStartDates = new Map(); // Maps event index to start date for sorting
-    
-    // Collect all events and their start dates
-    events.forEach((evt) => {
-        const eventIdx = getEventIndex(evt);
-        eventStartDates.set(eventIdx, evt.startDate);
-    });
-    
-    // Sort events by start date, then assign slots (earliest events get lower slots)
-    const sortedEvents = Array.from(eventStartDates.entries())
-        .sort((a, b) => a[1].localeCompare(b[1]));
-    
-    sortedEvents.forEach(([eventIdx, startDate], slot) => {
-        eventSlotMap.set(eventIdx, slot);
-    });
+    const eventSlotMap = assignStableEventSlots(events);
 
     // Separate single-day and multi-day events
     const multiDayEvents = events.filter(evt => evt.startDate !== evt.endDate);
@@ -142,6 +245,7 @@ export function renderParagraph() {
         (parseFloat(paragraphStyle.paddingRight) || 0);
     const contentWidth = Math.max(0, paragraphView.clientWidth - horizontalPadding);
     const columnsPerRow = Math.max(1, Math.floor(contentWidth / dayWidth));
+    const eventsContainerByDate = new Map();
 
     // Render all days as direct children of paragraphView
     allDays.forEach((dayData, index) => {
@@ -190,17 +294,7 @@ export function renderParagraph() {
         
         // For stacking calculation, we need ALL events that appear on this day
         const allDayEvents = allEventsForDay;
-        const eventCount = allDayEvents.length;
-
-        // Sort events by their slot assignment to ensure consistent ordering
-        const sortedDayEvents = [...allDayEvents].sort((a, b) => {
-            const slotA = eventSlotMap.get(getEventIndex(a));
-            const slotB = eventSlotMap.get(getEventIndex(b));
-            return slotA - slotB;
-        });
-
-        // Track vertical position for stacking
-        const eventHeight = eventCount > 0 ? (100 / eventCount) : 100;
+        const { eventHeight } = calculateTrackMetrics(allDayEvents, eventSlotMap);
 
         // Render multi-day events on EACH day they appear (for proper stacking)
         dayMultiDayEvents.forEach((evt) => {
@@ -212,9 +306,8 @@ export function renderParagraph() {
             const isEventStart = evt.startDate === dayData.dateKey;
             const isEventEnd = evt.endDate === dayData.dateKey;
 
-            // Find the slot position for this event
-            const localSlot = sortedDayEvents.findIndex(e => getEventIndex(e) === eventIdx);
-            const currentEventTop = localSlot * eventHeight;
+            const slot = eventSlotMap.get(eventIdx) ?? 0;
+            const currentEventTop = slot * eventHeight;
 
             const eventEl = createElement('div');
             eventEl.className = 'paragraph-event paragraph-event-multi-day';
@@ -250,66 +343,13 @@ export function renderParagraph() {
             eventsContainer.appendChild(eventEl);
         });
         
-        // Add text overlay on start day only (spans full event width)
-        const dayMultiDayEventsStarting = eventsByStartDate.get(dayData.dateKey) || [];
-        dayMultiDayEventsStarting.forEach((evt) => {
-            const eventIdx = getEventIndex(evt);
-            
-            // Calculate the span (number of days) for this event
-            const startDate = stringToDate(evt.startDate);
-            const endDate = stringToDate(evt.endDate);
-            const spanDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-            const remainingCellsInRow = columnsPerRow - (index % columnsPerRow);
-            const spanInThisRow = Math.max(1, Math.min(spanDays, remainingCellsInRow));
-            
-            // Find the slot position for this event
-            const localSlot = sortedDayEvents.findIndex(e => getEventIndex(e) === eventIdx);
-            const currentEventTop = localSlot * eventHeight;
-            
-            // Calculate total width: (spanDays * dayWidth) minus borders between cells
-            const totalWidth = (spanInThisRow * dayWidth) - ((spanInThisRow - 1) * borderWidth);
-            
-            // Create text overlay that spans the full event width
-            const textOverlay = createElement('div');
-            textOverlay.className = 'paragraph-event-text-overlay';
-            textOverlay.textContent = evt.text;
-            textOverlay.dataset.eventIdx = eventIdx;
-            textOverlay.title = escapeAttr(evt.text);
-            
-            // Position text to span entire event width
-            // Note: The text will extend beyond the first day's boundaries
-            textOverlay.style.cssText = `
-                position: absolute;
-                top: ${currentEventTop}%;
-                left: 0;
-                width: ${totalWidth}px;
-                height: ${eventHeight}%;
-                display: flex;
-                align-items: center;
-                padding: 2px 4px;
-                pointer-events: none;
-                z-index: 10;
-                overflow: visible;
-                white-space: nowrap;
-                box-sizing: border-box;
-                font-size: clamp(7px, 1vw, 9px);
-                font-weight: 500;
-                font-family: var(--font-family-mono);
-                text-transform: uppercase;
-                letter-spacing: 0.3px;
-            `;
-            
-            eventsContainer.appendChild(textOverlay);
-        });
-
         // Render single-day events
         daySingleDayEvents.forEach((evt) => {
             const eventIdx = getEventIndex(evt);
             const colorStyle = getEventColorStyle(evt.color, false, false);
 
-            // Find the slot position for this event
-            const localSlot = sortedDayEvents.findIndex(e => getEventIndex(e) === eventIdx);
-            const currentEventTop = localSlot * eventHeight;
+            const slot = eventSlotMap.get(eventIdx) ?? 0;
+            const currentEventTop = slot * eventHeight;
 
             const eventEl = createElement('div');
             eventEl.className = 'paragraph-event';
@@ -329,9 +369,20 @@ export function renderParagraph() {
             eventsContainer.appendChild(eventEl);
         });
 
+        eventsContainerByDate.set(dayData.dateKey, eventsContainer);
         dayCell.appendChild(eventsContainer);
         paragraphView.appendChild(dayCell);
     });
+
+    renderParagraphTextOverlays(
+        allDays,
+        eventsByStartDate,
+        eventSlotMap,
+        eventsContainerByDate,
+        dayWidth,
+        borderWidth,
+        columnsPerRow
+    );
 
     // Attach event handlers
     attachParagraphEventHandlers(paragraphView);
