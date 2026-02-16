@@ -5,6 +5,30 @@
 import { getById, toggleClass, hasClass } from '../utils/dom.js';
 import { saveData, saveNotepadState } from '../storage/persistence.js';
 
+const NOTEPAD_AUTO_COLLAPSE_MS = 60000;
+let notepadInactivityTimer = null;
+
+function clearNotepadInactivityTimer() {
+    if (notepadInactivityTimer) {
+        clearTimeout(notepadInactivityTimer);
+        notepadInactivityTimer = null;
+    }
+}
+
+function scheduleNotepadAutoCollapse() {
+    clearNotepadInactivityTimer();
+
+    const notepad = getById('notepad');
+    if (!notepad || hasClass(notepad, 'collapsed')) return;
+
+    notepadInactivityTimer = setTimeout(() => {
+        if (!hasClass(notepad, 'collapsed')) {
+            notepad.classList.add('collapsed');
+            saveNotepadState(true);
+        }
+    }, NOTEPAD_AUTO_COLLAPSE_MS);
+}
+
 /**
  * Toggle notepad collapsed state
  */
@@ -15,6 +39,12 @@ export function toggleNotepad() {
     toggleClass(notepad, 'collapsed');
     const isCollapsed = hasClass(notepad, 'collapsed');
     saveNotepadState(isCollapsed);
+
+    if (isCollapsed) {
+        clearNotepadInactivityTimer();
+    } else {
+        scheduleNotepadAutoCollapse();
+    }
 }
 
 /**
@@ -23,16 +53,32 @@ export function toggleNotepad() {
 export function initNotepad() {
     const notepadHeader = document.querySelector('.notepad-header');
     const notepadText = getById('notepadText');
+    const notepad = getById('notepad');
 
     if (notepadHeader) {
         notepadHeader.onclick = toggleNotepad;
+    }
+
+    if (notepad) {
+        ['mouseenter', 'mousemove', 'keydown', 'focusin', 'click'].forEach(eventName => {
+            notepad.addEventListener(eventName, () => {
+                if (!hasClass(notepad, 'collapsed')) {
+                    scheduleNotepadAutoCollapse();
+                }
+            });
+        });
     }
 
     // Auto-save notepad on input
     if (notepadText) {
         notepadText.addEventListener('input', () => {
             saveData();
+            scheduleNotepadAutoCollapse();
         });
+    }
+
+    if (notepad && !hasClass(notepad, 'collapsed')) {
+        scheduleNotepadAutoCollapse();
     }
 }
 
