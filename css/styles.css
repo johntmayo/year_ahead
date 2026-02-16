@@ -610,7 +610,7 @@ button:active {
 .countdown-controls {
     margin-top: 6px;
     display: grid;
-    grid-template-columns: minmax(160px, 280px) 1fr;
+    grid-template-columns: minmax(150px, 220px) 1fr;
     gap: 8px 10px;
     align-items: center;
 }
@@ -623,11 +623,11 @@ button:active {
 .countdown-controls p {
     margin: 0;
     font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .countdown-controls select {
-    width: min(100%, 320px);
+    width: min(100%, 260px);
 }
 
 @media (max-width: 900px) {
@@ -678,7 +678,7 @@ button:active {
 }
 
 .values-anchor textarea {
-    width: min(100%, 620px);
+    width: 100%;
     min-height: 56px;
     resize: vertical;
     padding: 10px 12px;
@@ -704,7 +704,7 @@ button:active {
 .values-anchor-note {
     margin-top: 6px;
     font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 /* ============================================
@@ -735,20 +735,19 @@ button:active {
 .insight-strip-header p {
     margin: 0;
     font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .insight-strip-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 340px));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    justify-content: start;
 }
 
 .insight-card {
-    border: 1px solid var(--border-light);
+    border: 1px solid rgba(44, 62, 80, 0.2);
     border-radius: var(--radius-lg);
-    background: rgba(44, 62, 80, 0.04);
+    background: rgba(44, 62, 80, 0.06);
     padding: 8px 10px;
 }
 
@@ -761,8 +760,13 @@ button:active {
 .insight-card p {
     margin: 0;
     font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    line-height: 1.4;
+    color: var(--text-primary);
+    line-height: 1.45;
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 @media (max-width: 900px) {
@@ -825,8 +829,8 @@ button:active {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 9px 12px;
-    background: rgba(44, 62, 80, 0.05);
+    padding: 8px 12px;
+    background: rgba(44, 62, 80, 0.08);
 }
 
 .insights-setup-summary::-webkit-details-marker {
@@ -845,23 +849,40 @@ button:active {
 
 .summary-title {
     font-size: var(--font-size-md);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
 }
 
 .summary-subtitle {
     margin-left: auto;
     font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .insights-setup-content {
     padding: 10px 12px;
-    display: grid;
+    display: flex;
+    align-items: flex-start;
     gap: 8px 12px;
     max-width: 1180px;
-    grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr);
-    align-items: start;
+}
+
+.insights-col {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+}
+
+.insights-col-left {
+    flex: 1 1 46%;
+    min-width: 320px;
+    max-width: 520px;
+}
+
+.insights-col-right {
+    flex: 1 1 54%;
+    min-width: 360px;
+    max-width: 680px;
 }
 
 .insights-setup .temporal-panel,
@@ -869,47 +890,19 @@ button:active {
 .insights-setup .insight-strip,
 .insights-setup .category-key {
     width: 100%;
-    max-width: 820px;
-    margin-right: auto;
-}
-
-.insights-setup .temporal-panel {
-    grid-column: 1;
-    grid-row: 1;
-}
-
-.insights-setup .year-string-container {
-    grid-column: 1;
-    grid-row: 2;
-}
-
-.insights-setup .category-key {
-    grid-column: 1;
-    grid-row: 3;
-}
-
-.insights-setup #valuesAnchor {
-    grid-column: 2;
-    grid-row: 1;
-}
-
-.insights-setup #insightStrip {
-    grid-column: 2;
-    grid-row: 2;
+    max-width: none;
+    margin: 0;
 }
 
 @media (max-width: 1100px) {
     .insights-setup-content {
-        grid-template-columns: 1fr;
+        display: grid;
     }
 
-    .insights-setup .temporal-panel,
-    .insights-setup .year-string-container,
-    .insights-setup .category-key,
-    .insights-setup #valuesAnchor,
-    .insights-setup #insightStrip {
-        grid-column: auto;
-        grid-row: auto;
+    .insights-col-left,
+    .insights-col-right {
+        min-width: 0;
+        max-width: none;
     }
 }
 
