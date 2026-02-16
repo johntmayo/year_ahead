@@ -265,14 +265,33 @@ export function importData(event, onComplete) {
     reader.onload = async function(e) {
         try {
             const data = JSON.parse(e.target.result);
+            const cloudEnabled = await isSupabaseEnabled();
 
             // Check if this is the new format (v2.0 with allYears) or old format
             if (data.allYears && data.version === '2.0') {
+                const importedYears = Object.keys(data.allYears);
+
                 // New format: import all years
-                Object.keys(data.allYears).forEach(year => {
+                importedYears.forEach(year => {
                     const yearData = data.allYears[year];
                     localStorage.setItem(getStorageKey(year), JSON.stringify(yearData));
                 });
+
+                // Clear local data for known years not present in backup.
+                AVAILABLE_YEARS.forEach(year => {
+                    if (!importedYears.includes(String(year))) {
+                        localStorage.removeItem(getStorageKey(year));
+                    }
+                });
+
+                // Keep cloud in sync so imported data is what users see after reload.
+                if (cloudEnabled) {
+                    const cloudSaveTasks = importedYears.map(year => {
+                        const yearData = data.allYears[year];
+                        return saveYearDataToCloud(parseInt(year, 10), yearData);
+                    });
+                    await Promise.all(cloudSaveTasks);
+                }
 
                 // Switch to the current year from backup if available
                 if (data.currentYear) {
@@ -287,7 +306,7 @@ export function importData(event, onComplete) {
                 await loadData();
             } else if (data.events && data.colors) {
                 // Old format: single year backup
-                const importYear = data.year || store.get('currentYear');
+                const importYear = parseInt(data.year, 10) || store.get('currentYear');
 
                 if (data.year && data.year !== store.get('currentYear')) {
                     if (confirm(`This backup is for ${data.year}. Switch to ${data.year}?`)) {
@@ -301,6 +320,11 @@ export function importData(event, onComplete) {
 
                 // Save to the appropriate year
                 localStorage.setItem(getStorageKey(importYear), JSON.stringify(data));
+
+                // If cloud sync is active, update cloud for this imported year too.
+                if (cloudEnabled) {
+                    await saveYearDataToCloud(importYear, data);
+                }
 
                 // Load current year's data
                 await loadData();
