@@ -142,6 +142,10 @@ body {
     transition: background var(--transition-smooth);
 }
 
+#appShell {
+    overflow-x: hidden;
+}
+
 /* ============================================
    AUTH GATE
    ============================================ */

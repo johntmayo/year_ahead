@@ -136,7 +136,12 @@ export function renderParagraph() {
     const gridlinesHidden = paragraphView && paragraphView.classList.contains('gridlines-hidden');
     const dayWidth = getParagraphDayWidth();
     const borderWidth = gridlinesHidden ? 0 : 0.5; // Border width when visible
-    const columnsPerRow = Math.max(1, Math.floor(paragraphView.clientWidth / dayWidth));
+    const paragraphStyle = window.getComputedStyle(paragraphView);
+    const horizontalPadding =
+        (parseFloat(paragraphStyle.paddingLeft) || 0) +
+        (parseFloat(paragraphStyle.paddingRight) || 0);
+    const contentWidth = Math.max(0, paragraphView.clientWidth - horizontalPadding);
+    const columnsPerRow = Math.max(1, Math.floor(contentWidth / dayWidth));
 
     // Render all days as direct children of paragraphView
     allDays.forEach((dayData, index) => {
@@ -286,6 +291,7 @@ export function renderParagraph() {
                 z-index: 10;
                 overflow: visible;
                 white-space: nowrap;
+                box-sizing: border-box;
                 font-size: clamp(7px, 1vw, 9px);
                 font-weight: 500;
                 font-family: var(--font-family-mono);
