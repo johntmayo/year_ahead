@@ -131,8 +131,8 @@ function renderParagraphTextOverlays(
                     padding: 2px 4px;
                     pointer-events: none;
                     z-index: 10;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    overflow: visible;
+                    text-overflow: clip;
                     white-space: nowrap;
                     box-sizing: border-box;
                     font-size: clamp(7px, 1vw, 9px);
