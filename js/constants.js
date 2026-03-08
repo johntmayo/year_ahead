@@ -36,7 +36,7 @@ export const TIMELINE_LINE_OPTIONS = [1, 2, 4];
 
 export const EVENT_HEIGHT = {
     CALENDAR: 16,
-    TIMELINE: 12
+    TIMELINE: 10
 };
 
 export const TIMELINE_DAY_WIDTH = 12;

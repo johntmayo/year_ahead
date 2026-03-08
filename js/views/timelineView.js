@@ -83,33 +83,25 @@ export function renderTimeline() {
         lineDays.forEach((dateKey, dayIdx) => {
             const dayHeader = createElement('div', { className: 'timeline-day-header' });
             const date = stringToDate(dateKey);
+            const isMonthStart = date.getDate() === 1;
+
+            if (isMonthStart) {
+                dayHeader.appendChild(
+                    createElement('div', { className: 'timeline-month-header' }, MONTH_NAMES[date.getMonth()].substring(0, 3))
+                );
+            }
+
             // Show day number only for first of month or every 10th day
-            if (date.getDate() === 1 || (startIdx + dayIdx) % 10 === 0) {
-                dayHeader.textContent = date.getDate();
+            if (isMonthStart || (startIdx + dayIdx) % 10 === 0) {
+                dayHeader.appendChild(
+                    createElement('div', { className: 'timeline-day-header-number' }, String(date.getDate()))
+                );
             }
             headerRow.appendChild(dayHeader);
         });
         container.appendChild(headerRow);
 
         const row = createElement('div', { className: 'timeline-row' });
-
-        // Add month markers
-        let lastMonth = -1;
-        lineDays.forEach((dateKey, dayIdx) => {
-            const date = stringToDate(dateKey);
-            const month = date.getMonth();
-            const dayOfMonth = date.getDate();
-
-            // Add month marker at start of each month
-            if (month !== lastMonth && dayOfMonth <= 3) {
-                const marker = createElement('div', {
-                    className: 'timeline-month-marker',
-                    style: { left: `${dayIdx * 14}px` }
-                }, MONTH_NAMES[month].substring(0, 3));
-                row.appendChild(marker);
-                lastMonth = month;
-            }
-        });
 
         // Calculate line bounds for span calculations
         const lineStart = stringToDate(lineDays[0]);
@@ -156,19 +148,13 @@ function createTimelineDay(dateKey, lineStart, lineEnd) {
     const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const isToday = dateKey === todayKey;
     const isPast = dateKey < todayKey;
-    const dayClassName = `timeline-day${isPast ? ' past-day' : ''}${isToday ? ' today-day' : ''}`;
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const dayClassName = `timeline-day${isWeekend ? ' weekend' : ''}${isPast ? ' past-day' : ''}${isToday ? ' today-day' : ''}`;
 
     const dayDiv = createElement('div', {
         className: dayClassName,
         dataset: { date: dateKey }
     });
-
-    // Add day number label for first of month
-    if (date.getDate() === 1) {
-        const label = createElement('div', { className: 'timeline-day-label' },
-            `${MONTH_NAMES[date.getMonth()].substring(0, 3)} ${date.getDate()}`);
-        dayDiv.appendChild(label);
-    }
 
     // Create events container
     const eventsContainer = createElement('div', { className: 'timeline-day-events' });
